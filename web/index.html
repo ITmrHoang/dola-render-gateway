@@ -1,0 +1,3339 @@
+<!DOCTYPE html>
+<html lang="vi">
+<!-- Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V5 · genre: modern-minimal · macrostructure: workbench · theme: cobalt -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dola Studio — AI Video Generation & Render Gateway</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<!-- Google Fonts: Space Grotesk (Display) + Inter (Body) + JetBrains Mono (Code/Labels) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ---- Hallmark Cobalt Design System Tokens ---- */
+:root {
+  /* Paper & Grounds */
+  --color-paper-1: #f8fafc; /* Cool engineered paper oklch(98.5% 0.004 250) */
+  --color-paper-2: #ffffff; /* Crisp white surface */
+  --color-paper-3: #f1f5f9; /* Muted tech surface */
+  --color-paper-hover: #f8fafc;
+  
+  /* Hairline Rules (Drawn with a ruler, no blurry shadows) */
+  --color-rule: #e2e8f0;
+  --color-rule-strong: #cbd5e1;
+  --color-rule-subtle: #f1f5f9;
+
+  /* Cool Inks */
+  --color-ink-1: #0f172a; /* Deep charcoal ink oklch(24% 0.02 258) */
+  --color-ink-2: #334155; /* Secondary text */
+  --color-ink-3: #64748b; /* Muted labels & mono metadata */
+
+  /* Electric Cobalt Signal Accent (< 5% viewport usage) */
+  --color-accent: #2563eb; /* Electric cobalt oklch(58% 0.20 256) */
+  --color-accent-hover: #1d4ed8;
+  --color-accent-subtle: #eff6ff;
+  --color-accent-border: #bfdbfe;
+
+  /* Functional Status Colors */
+  --color-danger: #dc2626;
+  --color-danger-subtle: #fef2f2;
+  --color-danger-border: #fecaca;
+  --color-warning: #d97706;
+  --color-warning-subtle: #fffbeb;
+  --color-warning-border: #fde68a;
+  --color-info: #0284c7;
+  --color-info-subtle: #f0f9ff;
+  --color-info-border: #bae6fd;
+  --color-success: #16a34a;
+  --color-success-subtle: #f0fdf4;
+  --color-success-border: #bbf7d0;
+
+  /* Focus Ring */
+  --color-focus: rgba(37, 99, 235, 0.22);
+
+  /* Hallmark Technical Radii (Tight & Architectural) */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+
+  /* Fonts */
+  --font-display: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Tactile Physics */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  overflow-x: clip;
+  background-color: var(--color-paper-1);
+  color: var(--color-ink-1);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.5;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Typography Hierarchy */
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display);
+  font-style: normal;
+  letter-spacing: -0.02em;
+  color: var(--color-ink-1);
+}
+
+.mono-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-3);
+  margin-bottom: 6px;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+a:hover {
+  color: var(--color-accent-hover);
+}
+
+/* Hallmark Flush Instrument Header */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 24px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.brand-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: -0.025em;
+  color: var(--color-ink-1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brand-version {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+  background: var(--color-paper-3);
+  color: var(--color-ink-2);
+  border: 1px solid var(--color-rule);
+}
+
+/* Hallmark ⌘K Palette Button */
+.cmd-k-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+  background: var(--color-paper-3);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink-3);
+  font-size: 12.5px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.15s var(--ease-spring);
+}
+.cmd-k-trigger:hover {
+  background: #ffffff;
+  border-color: var(--color-rule-strong);
+  color: var(--color-ink-1);
+  box-shadow: var(--shadow-sm);
+}
+.kbd-shortcut {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 1px 5px;
+  background: #ffffff;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: 4px;
+  color: var(--color-ink-2);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--color-ink-2);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--color-paper-3);
+  border: 1px solid var(--color-rule);
+}
+.live-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-success);
+  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+
+/* Nav Rail (Numbered Modern-Minimal Tabs) */
+.nav-rail {
+  background: #ffffff;
+  border-bottom: 1px solid var(--color-rule);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-rail::-webkit-scrollbar { display: none; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 18px;
+  border: none;
+  background: transparent;
+  color: var(--color-ink-3);
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  transition: color 0.16s var(--ease-spring);
+}
+.nav-item:hover {
+  color: var(--color-ink-1);
+}
+.nav-item.active {
+  color: var(--color-accent);
+}
+.nav-item.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-accent);
+}
+.nav-num {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+/* Main Container */
+main {
+  max-width: 1420px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* Hallmark 05 · Workbench Grid */
+.workbench-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.18fr) minmax(0, 0.82fr);
+  gap: 20px;
+  align-items: start;
+}
+.workbench-grid > * {
+  min-width: 0;
+}
+@media (max-width: 1080px) {
+  .workbench-grid { grid-template-columns: 1fr; }
+}
+
+/* Switch Toggle Component */
+.switch-toggle {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  vertical-align: middle;
+}
+.switch-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.switch-toggle .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--color-rule-strong);
+  transition: .18s var(--ease-spring);
+  border-radius: 20px;
+}
+.switch-toggle .slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .18s var(--ease-spring);
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+.switch-toggle input:checked + .slider {
+  background-color: #059669;
+}
+.switch-toggle input:checked + .slider:before {
+  transform: translateX(16px);
+}
+
+/* Workbench Panel */
+.wb-panel {
+  background: #ffffff;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-sm);
+}
+
+.wb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--color-rule);
+}
+.wb-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Buttons (Tactile Spring Physics) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-rule-strong);
+  background: #ffffff;
+  color: var(--color-ink-1);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s var(--ease-spring);
+  text-decoration: none;
+  user-select: none;
+}
+.btn:hover {
+  background: var(--color-paper-3);
+  border-color: var(--color-rule-strong);
+  transform: translateY(-1px);
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn-p {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #ffffff;
+  font-weight: 600;
+}
+.btn-p:hover {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  color: #ffffff;
+}
+.btn-sm {
+  padding: 4px 9px;
+  font-size: 12px;
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Form Controls */
+.form-group {
+  margin-bottom: 16px;
+}
+.net-eff { font-size: 11.5px; color: var(--color-ink-3); margin-top: 4px; font-family: var(--font-mono); }
+.net-eff b { color: var(--color-ink-1); }
+.net-src { display: inline-block; padding: 0 6px; border-radius: 8px; font-size: 10.5px; font-family: var(--font-body, inherit); margin-left: 4px; }
+.net-src.auto { background: #dcfce7; color: #166534; }
+.net-src.manual { background: #dbeafe; color: #1e40af; }
+.net-src.default { background: #f1f5f9; color: #475569; }
+.form-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-ink-2);
+  margin-bottom: 6px;
+}
+.form-control {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-rule);
+  background: #ffffff;
+  color: var(--color-ink-1);
+  font-family: inherit;
+  font-size: 13.5px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.form-control:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-focus);
+}
+
+/* Segmented Toggle Pills (Model & Ratios) */
+.pill-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+.pill-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  background: var(--color-paper-3);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  color: var(--color-ink-2);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s var(--ease-spring);
+  text-align: center;
+}
+.pill-btn:hover {
+  background: #ffffff;
+  border-color: var(--color-rule-strong);
+}
+.pill-btn.active {
+  background: #ffffff;
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent), var(--shadow-sm);
+}
+.pill-meta {
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--color-ink-3);
+  margin-top: 2px;
+}
+
+/* Reference Images Grid */
+.ref-thumb-card {
+  background: var(--color-paper-2);
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.16s var(--ease-spring);
+}
+.ref-thumb-card:hover {
+  border-color: var(--color-rule-strong);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  background: var(--color-paper-3);
+  color: var(--color-ink-2);
+  border: 1px solid var(--color-rule);
+}
+.b-blue { background: var(--color-accent-subtle); color: var(--color-accent); border-color: var(--color-accent-border); }
+.b-green { background: var(--color-success-subtle); color: var(--color-success); border-color: var(--color-success-border); }
+.b-amber { background: var(--color-warning-subtle); color: var(--color-warning); border-color: var(--color-warning-border); }
+.b-red { background: var(--color-danger-subtle); color: var(--color-danger); border-color: var(--color-danger-border); }
+
+/* Right Monitor / Code Playground Terminal */
+.code-terminal {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: var(--radius-md);
+  color: #e2e8f0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 14px 16px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  position: relative;
+}
+.code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-rule);
+  color: var(--color-ink-2);
+  font-size: 11px;
+}
+
+/* Tables */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-md);
+  background: #ffffff;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+th {
+  background: var(--color-paper-3);
+  padding: 10px 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--color-ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-family: var(--font-mono);
+  border-bottom: 1px solid var(--color-rule);
+}
+td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--color-rule-subtle);
+  color: var(--color-ink-1);
+}
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--color-paper-hover); }
+
+/* Dialogs & Masks */
+.dialog, .mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.15s ease-out;
+}
+.dialog .box, .mask .box {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 480px;
+  max-width: 92vw;
+  max-height: 88vh;
+  overflow: auto;
+  border: 1px solid var(--color-rule);
+  box-shadow: var(--shadow-lg);
+  animation: scaleIn 0.2s var(--ease-spring);
+  margin: auto;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+
+/* Command Palette Dialog */
+.cmd-palette-box {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  width: 580px;
+  max-width: 94vw;
+  border: 1px solid var(--color-rule);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: scaleIn 0.2s var(--ease-spring);
+}
+.cmd-palette-input {
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  border-bottom: 1px solid var(--color-rule);
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--color-ink-1);
+  outline: none;
+  background: #ffffff;
+}
+.cmd-palette-list {
+  max-height: 380px;
+  overflow-y: auto;
+  padding: 10px;
+}
+.cmd-group-title {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--color-ink-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 8px 10px 4px;
+}
+.cmd-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--color-ink-1);
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: all 0.12s ease;
+}
+.cmd-item:hover, .cmd-item.selected {
+  background: var(--color-accent-subtle);
+  color: var(--color-accent);
+}
+
+/* Micro-Toasts */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  background: #ffffff;
+  color: var(--color-ink-1);
+  border: 1px solid var(--color-rule);
+  box-shadow: var(--shadow-md);
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transform: translateY(-16px) scale(0.96);
+  opacity: 0;
+  transition: transform 0.22s var(--ease-spring), opacity 0.22s var(--ease-spring);
+}
+.toast.toast-show { transform: translateY(0) scale(1); opacity: 1; }
+.toast.toast-hide { transform: translateY(-10px) scale(0.96); opacity: 0; }
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--color-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- Hallmark Instrument Header -->
+<header>
+  <div class="brand-wrap">
+    <div class="brand-icon">D</div>
+    <div>
+      <div class="brand-title">
+        Dola Render Gateway
+        <span class="brand-version">v0.4.0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Command Palette Trigger Button -->
+  <button class="cmd-k-trigger" onclick="openCommandPalette()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    <span>Tìm lệnh hoặc điều hướng...</span>
+    <span class="kbd-shortcut">Ctrl K</span>
+  </button>
+
+  <div class="header-right">
+    <div class="live-indicator">
+      <span class="live-pulse-dot"></span>
+      <span id="poolStatusText">POOL READY</span>
+    </div>
+    <div class="live-indicator" title="Bấm để cấu hình proxy & vị trí" style="cursor:pointer" onclick="openProxyModal()">
+      <span style="color:var(--color-ink-3);font-size:10.5px">PROXY:</span>
+      <span id="proxyStatusText" style="font-family:var(--font-mono)">Direct</span>
+    </div>
+    
+    <button class="btn" onclick="openDonateModal()" style="color:#b45309;border-color:#fde68a;background:#fffbeb;font-weight:600">
+      ☕ Ủng hộ tác giả
+    </button>
+    <button class="btn" onclick="refresh()" title="Làm mới dữ liệu">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+    </button>
+    <button class="btn" onclick="logout()" title="Đăng xuất">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+    </button>
+  </div>
+</header>
+
+<!-- Hallmark Numbered Navigation Rail -->
+<div class="nav-rail">
+  <button class="nav-item active" data-tab="create" onclick="switchTab('create')">
+    <span class="nav-num">01</span> Studio Video
+  </button>
+  <button class="nav-item" data-tab="unwatermark" onclick="switchTab('unwatermark')">
+    <span class="nav-num">02</span> Tách Watermark
+  </button>
+  <button class="nav-item" data-tab="dash" onclick="switchTab('dash')">
+    <span class="nav-num">03</span> Thống Kê Pool
+  </button>
+  <button class="nav-item" data-tab="accounts" onclick="switchTab('accounts')">
+    <span class="nav-num">04</span> Tài Khoản Dola
+  </button>
+  <button class="nav-item" data-tab="tasks" onclick="switchTab('tasks')">
+    <span class="nav-num">05</span> Hàng Đợi Tác Vụ
+  </button>
+  <button class="nav-item" data-tab="keys" onclick="switchTab('keys')">
+    <span class="nav-num">06</span> API Keys
+  </button>
+</div>
+
+<main>
+  <!-- ================= TAB 1: 05 · WORKBENCH (STUDIO) ================= -->
+  <section id="tab-create">
+    <div id="noAccWarn" style="display:none;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:#92400e;margin-bottom:16px">
+      ⚠️ <b>Chưa có tài khoản Dola nào trong pool!</b> Vui lòng chuyển sang tab <b>"Tài Khoản Dola"</b> để thêm Profile Cookie JSON.
+    </div>
+
+    <!-- Hallmark Asymmetric Workbench Layout -->
+    <div class="workbench-grid">
+      
+      <!-- LEFT WORKBENCH COLUMN: Parameter & Controls Studio -->
+      <div class="wb-panel">
+        <div class="wb-header">
+          <div>
+            <div class="mono-eyebrow">Interactive Studio</div>
+            <div class="wb-title">Khởi Tạo Video ByteDance Seedance</div>
+          </div>
+          <span class="badge b-blue">Seedance Engine</span>
+        </div>
+
+        <!-- Prompt Textarea -->
+        <div class="form-group">
+          <div class="form-label">
+            <span>Mô tả cảnh quay (Prompt) <span style="color:var(--color-danger)">*</span></span>
+            <span id="prompt_char_count" style="font-family:var(--font-mono);font-size:11px;color:var(--color-ink-3)">0 ký tự</span>
+          </div>
+          <textarea id="gen_prompt" class="form-control" style="min-height:108px;resize:vertical" placeholder="Ví dụ: Một chú mèo con màu cam chạy nhảy trên đồng cỏ hoa vàng, ánh nắng hoàng hôn điện ảnh chiếu nghiêng, 4k ultra-detailed, cinematic lighting..." oninput="updatePromptCount();updateApiPayloadPreview()"></textarea>
+          
+          <!-- Preset Prompts -->
+          <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
+            <span style="font-size:11px;color:var(--color-ink-3);align-self:center">Mẫu nhanh:</span>
+            <button type="button" class="btn btn-sm" onclick="setPresetPrompt('Cinematic cyberpunk city in rain, neon glowing reflections, wet pavement, high camera pan, 4k 60fps')">Cyberpunk Rain</button>
+            <button type="button" class="btn btn-sm" onclick="setPresetPrompt('Slow-motion drone shot of dramatic misty mountain valley at sunrise, golden rays, breathtaking nature')">Drone Sunrise</button>
+            <button type="button" class="btn btn-sm" onclick="setPresetPrompt('Close-up anime character with flowing hair, gentle breeze, cherry blossoms, Makoto Shinkai aesthetic')">Anime Portrait</button>
+          </div>
+        </div>
+
+        <!-- Model Selector (Segmented Pills) -->
+        <div class="form-group">
+          <div class="form-label"><span>Mô hình Video AI</span></div>
+          <div class="pill-group" id="modelPillGroup">
+            <div class="pill-btn active" data-val="seedance-2.5" onclick="selectModelPill('seedance-2.5')">
+              <span>🌟 Seedance 2.5</span>
+              <span class="pill-meta">Chuyển động mượt & thông minh</span>
+            </div>
+            <div class="pill-btn" data-val="seedance-2.0" onclick="selectModelPill('seedance-2.0')">
+              <span>⚡ Seedance 2.0</span>
+              <span class="pill-meta">Tốc độ cao & ổn định</span>
+            </div>
+          </div>
+          <input type="hidden" id="gen_model" value="seedance-2.5">
+        </div>
+
+        <!-- Ratio & Duration Grid -->
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px" class="form-group">
+          <div>
+            <div class="form-label"><span>Tỷ lệ khung hình</span></div>
+            <select id="gen_ratio" class="form-control" onchange="updateApiPayloadPreview()">
+              <option value="16:9" selected>16:9 (Video Ngang — YouTube / PC)</option>
+              <option value="9:16">9:16 (Video Dọc — TikTok / Reels / Shorts)</option>
+              <option value="1:1">1:1 (Hình vuông — Feed)</option>
+              <option value="4:3">4:3 (Tiêu chuẩn 4:3)</option>
+              <option value="3:4">3:4 (Khung dọc 3:4)</option>
+            </select>
+          </div>
+
+          <div>
+            <div class="form-label"><span>Thời lượng</span></div>
+            <select id="gen_duration" class="form-control" onchange="updateApiPayloadPreview()">
+              <option value="10" selected>10 giây (Tiêu chuẩn)</option>
+              <option value="15">15 giây (Mở rộng)</option>
+              <option value="30">30 giây (Mở rộng)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Reference Images Section -->
+        <div class="form-group">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div class="form-label" style="margin-bottom:0"><span>Ảnh tham chiếu (Reference Images — Multi-image)</span></div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span id="ref_img_count" class="badge" style="font-size:11px;font-weight:600">0 / 10 ảnh</span>
+              <button id="ref_clear_all_btn" type="button" class="btn btn-sm" onclick="clearAllRefImages()" style="display:none;padding:2px 8px;font-size:11px;color:var(--color-danger)">
+                Xóa tất cả
+              </button>
+            </div>
+          </div>
+
+          <!-- Hidden File Input for Multiple Images from Computer -->
+          <input type="file" id="local_ref_file_input" multiple accept="image/png,image/jpeg,image/webp,image/jpg" style="display:none" onchange="handleLocalFilesSelected(event)">
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" class="btn btn-p" onclick="document.getElementById('local_ref_file_input').click()" style="white-space:nowrap;padding:0 16px;gap:6px;background:var(--color-accent);color:#fff">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              📁 Tải ảnh từ máy tính
+            </button>
+
+            <input id="gen_ref_input" class="form-control" style="flex:1;min-width:220px" placeholder="Hoặc dán URL ảnh (https://...) rồi nhấn Thêm" onkeydown="if(event.key==='Enter'){event.preventDefault();addRefImage()}">
+            
+            <button type="button" class="btn" onclick="addRefImage()" style="white-space:nowrap;padding:0 14px;gap:6px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Thêm URL
+            </button>
+            <button type="button" class="btn" onclick="openMultiRefModal()" title="Dán danh sách nhiều URL cùng lúc" style="white-space:nowrap;padding:0 13px;gap:6px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              Dán nhiều link
+            </button>
+          </div>
+
+          <!-- Drag and Drop Dropzone -->
+          <div id="ref_dropzone" style="margin-top:10px;padding:12px 16px;border:2px dashed var(--color-rule);border-radius:var(--radius-sm);text-align:center;background:var(--color-paper-2);cursor:pointer;transition:all 0.18s" onclick="document.getElementById('local_ref_file_input').click()" ondragover="event.preventDefault();this.style.borderColor='var(--color-accent)';this.style.background='var(--color-paper-3)'" ondragleave="this.style.borderColor='var(--color-rule)';this.style.background='var(--color-paper-2)'" ondrop="handleDropRefFiles(event)">
+            <div style="font-size:12.5px;color:var(--color-ink-2);display:flex;align-items:center;justify-content:center;gap:8px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+              <span>Kéo thả nhiều ảnh từ máy tính vào đây (hoặc click để chọn nhiều file)</span>
+            </div>
+            <div style="font-size:11px;color:var(--color-ink-3);margin-top:4px">
+              ⚡ Ảnh sẽ được tải lên theo <b>đúng thứ tự bạn chọn</b> (#1, #2, #3...). Có nút <b>▲ Lên / ▼ Xuống</b> trên mỗi ảnh để đổi thứ tự tùy ý.
+            </div>
+          </div>
+
+          <!-- Reference Images Grid Display -->
+          <div id="ref_images_container" style="display:none;margin-top:12px;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:10px"></div>
+          
+          <div style="margin-top:7px;font-size:12px;color:var(--color-ink-3);line-height:1.5">
+            💡 <b>Gợi ý:</b> ByteDance Seedance trên Dola hỗ trợ tối đa <b>10 ảnh tham chiếu</b> (mỗi ảnh ≤ 15MB) để giữ tạo hình nhân vật, góc máy và phong cách nhất quán.
+          </div>
+        </div>
+
+        <!-- Primary Trigger Action -->
+        <div style="margin-top:22px;display:flex;align-items:center;gap:14px">
+          <button id="btn_submit_gen" class="btn btn-p" style="padding:10px 26px;font-size:14px;font-weight:600" onclick="submitGenerateVideo()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            Khởi Tạo Render Video
+          </button>
+          <span id="gen_msg" style="color:var(--color-ink-3);font-size:12px;font-family:var(--font-mono)"></span>
+        </div>
+      </div>
+
+      <!-- RIGHT WORKBENCH COLUMN: Live Output Monitor & API Playground -->
+      <div style="display:flex;flex-direction:column;gap:18px">
+        
+        <!-- Live Video Monitor Panel -->
+        <div class="wb-panel">
+          <div class="wb-header">
+            <div>
+              <div class="mono-eyebrow">Monitor & Player</div>
+              <div class="wb-title">Trạng Thái Render Trực Tiếp</div>
+            </div>
+            <span id="gen_status_badge" class="badge">Idle</span>
+          </div>
+
+          <div id="gen_status_box" style="min-height:56px;display:flex;align-items:center;padding:14px 16px;background:var(--color-paper-3);border:1px solid var(--color-rule);border-radius:var(--radius-md);font-size:13.5px">
+            <span class="spinner" id="gen_spinner" style="display:none;margin-right:8px"></span>
+            <span id="gen_status_text">Hệ thống sẵn sàng. Điền Prompt bên trái và bấm Khởi Tạo để bắt đầu render.</span>
+          </div>
+
+          <div id="gen_video_container" style="display:none;margin-top:16px">
+            <video id="gen_video_player" controls autoplay style="width:100%;max-height:420px;border-radius:var(--radius-md);background:#000;display:block"></video>
+            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+              <a id="gen_download_btn" class="btn btn-p" href="#" download target="_blank">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="0"></line></svg>
+                Tải MP4 Không Watermark
+              </a>
+              <button class="btn" onclick="copyGenUrl()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Sao chép liên kết video
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-time API Payload & cURL Developer Card -->
+        <div class="wb-panel" style="padding:18px">
+          <div class="code-bar">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--color-accent)"></span>
+              <span style="font-weight:700;color:var(--color-ink-1);font-size:12.5px;letter-spacing:-0.01em">API PAYLOAD</span>
+              <span style="font-family:var(--font-mono);font-size:11px;font-weight:600;background:var(--color-paper-3);border:1px solid var(--color-rule-strong);color:var(--color-ink-2);padding:2px 7px;border-radius:4px">POST /v1/videos/generations</span>
+            </div>
+            <button class="btn btn-sm" onclick="copyCurlSnippet()" style="font-family:var(--font-mono);font-size:11px;padding:3px 10px;gap:5px">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copy cURL
+            </button>
+          </div>
+          <pre id="api_payload_preview" class="code-terminal" style="padding:10px 12px;font-size:11.5px;max-height:220px"></pre>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAB 2: UNWATERMARKED EXTRACTOR ================= -->
+  <section id="tab-unwatermark" style="display:none">
+    <div class="wb-panel" style="max-width:880px;margin:0 auto">
+      <div class="wb-header">
+        <div>
+          <div class="mono-eyebrow">Master Stream Decoder</div>
+          <div class="wb-title">Trích Xuất Video Gốc Không Watermark</div>
+        </div>
+        <span class="badge b-green">lr=unwatermarked</span>
+      </div>
+      <p style="color:var(--color-ink-2);font-size:13px;line-height:1.6;margin-bottom:18px">
+        Dán đường dẫn chat hoặc mã Conversation ID từ Dola. Hệ thống sẽ truy vấn trực tiếp luồng master 1080P gốc không chứa logo và tải về thư mục downloads của bạn.
+      </p>
+
+      <div class="form-group">
+        <div class="form-label"><span>Link hội thoại Dola hoặc Conversation ID</span></div>
+        <div style="display:flex;gap:10px">
+          <input id="clean_input" class="form-control" placeholder="Ví dụ: https://www.dola.com/chat/38417930345701393 hoặc 38417930345701393" onkeydown="if(event.key==='Enter')submitExtractClean()">
+          <button id="btn_clean_submit" class="btn btn-p" style="white-space:nowrap;padding:0 22px;font-weight:600" onclick="submitExtractClean()">
+            Tải Không Logo
+          </button>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--color-ink-3)">
+          💡 Video mẫu kiểm tra: <a href="javascript:void(0)" onclick="q('#clean_input').value='38417930345701393';submitExtractClean()" style="text-decoration:underline">Thử ngay ID: 38417930345701393</a>
+        </div>
+      </div>
+
+      <div id="clean_result_box" style="display:none;margin-top:20px;padding:16px;background:var(--color-paper-3);border:1px solid var(--color-rule);border-radius:var(--radius-md)">
+        <div id="clean_msg"></div>
+        <div id="clean_video_wrap" style="display:none;margin-top:14px">
+          <video id="clean_video_player" controls style="width:100%;max-height:460px;border-radius:var(--radius-md);background:#000;display:block"></video>
+          <div style="margin-top:12px;display:flex;gap:10px">
+            <a id="clean_download_btn" class="btn btn-p" href="#" download target="_blank">📥 Tải MP4 Ngay</a>
+            <button class="btn" onclick="copy(currentVideoUrl);toast('Đã sao chép link video!','success')">📋 Sao chép Link</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:28px">
+        <div class="form-label"><span>Video Đã Tải Về Trong Thư Mục downloads/</span></div>
+        <div id="downloadsTable" class="table-wrap"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TAB 3: DASHBOARD STATS ================= -->
+  <section id="tab-dash" style="display:none">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;margin-bottom:24px">
+      <div class="wb-panel" style="padding:16px">
+        <div class="mono-eyebrow">TỔNG TÁC VỤ</div>
+        <div id="st_total_tasks" style="font-family:var(--font-display);font-size:28px;font-weight:700">0</div>
+        <div id="st_total_subtext" style="font-size:12px;color:var(--color-ink-3);margin-top:4px">Đã ghi nhận trong cơ sở dữ liệu</div>
+      </div>
+      <div class="wb-panel" style="padding:16px">
+        <div class="mono-eyebrow">THÀNH CÔNG</div>
+        <div id="st_completed_tasks" style="font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--color-success)">0</div>
+        <div id="st_completed_subtext" style="font-size:12px;color:var(--color-ink-3);margin-top:4px">Hoàn tất kết xuất video 1080P</div>
+      </div>
+      <div class="wb-panel" style="padding:16px">
+        <div class="mono-eyebrow">TỈ LỆ THÀNH CÔNG</div>
+        <div id="st_success_rate" style="font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--color-accent)">0%</div>
+        <div id="st_rate_subtext" style="font-size:12px;color:var(--color-ink-3);margin-top:4px">Độ tin cậy xử lý pool</div>
+      </div>
+      <div class="wb-panel" style="padding:16px">
+        <div class="mono-eyebrow">TÀI KHOẢN POOL</div>
+        <div id="st_accounts" style="font-family:var(--font-display);font-size:28px;font-weight:700">0</div>
+        <div style="font-size:12px;color:var(--color-ink-3);margin-top:4px"><span id="st_active_accounts">0</span> khả dụng / <span id="st_busy_accounts">0</span> đang bận</div>
+      </div>
+    </div>
+
+    <div class="wb-panel">
+      <div class="wb-header">
+        <div>
+          <div class="mono-eyebrow">Thống Kê 7 Ngày Gần Nhất</div>
+          <div class="wb-title">Biểu Đồ Sản Lượng Video</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:14px;font-size:12px;font-family:var(--font-mono)">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="display:inline-block;width:10px;height:10px;background:#16a34a;border-radius:2px"></span>
+            <span>Thành công</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="display:inline-block;width:10px;height:10px;background:#cbd5e1;border-radius:2px"></span>
+            <span>Thất bại</span>
+          </div>
+        </div>
+      </div>
+      <div id="trendChart" style="display:flex;align-items:flex-end;gap:18px;height:170px;padding:14px 4px 4px"></div>
+    </div>
+  </section>
+
+  <!-- ================= TAB 4: ACCOUNTS ================= -->
+  <section id="tab-accounts" style="display:none">
+    <div class="wb-panel">
+      <div class="wb-header">
+        <div>
+          <div class="mono-eyebrow">Account Pool Manager</div>
+          <div class="wb-title">Danh Sách Tài Khoản Dola</div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <button class="btn" onclick="openLoginAcc('auto')">＋ Đăng Nhập Google</button>
+          <button class="btn btn-p" onclick="openBulkLoginModal()">⚡ Đăng Nhập Hàng Loạt</button>
+          <button class="btn" onclick="openAddAcc()">🍪 Thêm Cookie JSON</button>
+        </div>
+      </div>
+
+      <!-- Bulk Login Live Banner (shown if batch running in background) -->
+      <div id="bulkActiveBanner" style="display:none;margin-bottom:16px;padding:12px 16px;background:var(--color-paper-3);border:1px solid var(--color-accent);border-left:4px solid var(--color-accent);border-radius:var(--radius-md);align-items:center;justify-content:space-between;animation:fadeIn 0.2s ease">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span class="spinner" style="border-color:var(--color-accent);border-top-color:transparent"></span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:var(--color-ink-1)" id="bulkActiveBannerTitle">Đang tự động đăng nhập hàng loạt...</div>
+            <div style="font-size:11.5px;color:var(--color-ink-3);margin-top:2px" id="bulkActiveBannerSub">Hệ thống đang chạy nền an toàn theo từng tài khoản.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm btn-p" onclick="openBulkLoginModal()">Mở Tiến Trình</button>
+        </div>
+      </div>
+
+      <!-- Proxy Information Card -->
+      <div style="margin-bottom:16px;padding:12px 16px;background:var(--color-paper-3);border:1px solid var(--color-rule);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:space-between;gap:14px">
+        <div>
+          <div style="font-family:var(--font-display);font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:8px">
+            <span>🌐 Egress Proxy Hiện Tại:</span>
+            <code id="accProxyDisplay" style="font-family:var(--font-mono);font-size:13px;color:var(--color-accent)">Direct / None</code>
+          </div>
+          <div style="font-size:12px;color:var(--color-ink-2);margin-top:4px;font-family:var(--font-mono)">
+            Ngôn ngữ: <b id="accLocaleDisplay">-</b> · Timezone: <b id="accTimezoneDisplay">-</b> · Region: <b id="accRegionDisplay">-</b> · GPS: <b id="accGeoDisplay">-</b>
+          </div>
+          <div style="font-size:12px;color:var(--color-ink-3);margin-top:3px;line-height:1.5">
+            Dola (ByteDance) yêu cầu IP mạng thuộc vùng <b>Nhật Bản (JP)</b> hoặc <b>Hàn Quốc (KR)</b>. Bấm <b>Cấu Hình Proxy &amp; Vị Trí</b> để đổi proxy, locale, múi giờ, region; áp dụng cho task kế tiếp.
+          </div>
+        </div>
+        <button class="btn btn-sm" onclick="promptProxyHelp()" style="white-space:nowrap">⚙️ Cấu Hình Proxy &amp; Vị Trí</button>
+      </div>
+
+      <div id="accountsTable" class="table-wrap"></div>
+    </div>
+  </section>
+
+  <!-- ================= TAB 5: TASKS ================= -->
+  <section id="tab-tasks" style="display:none">
+    <div class="wb-panel">
+      <div class="wb-header">
+        <div>
+          <div class="mono-eyebrow">Queue & History</div>
+          <div class="wb-title">Hàng Đợi & Lịch Sử Tác Vụ</div>
+        </div>
+        <button class="btn" onclick="loadTasks()">Làm Mới</button>
+      </div>
+      <div id="tasksTable" class="table-wrap"></div>
+    </div>
+  </section>
+
+  <!-- ================= TAB 6: API KEYS ================= -->
+  <section id="tab-keys" style="display:none">
+    <div class="wb-panel">
+      <div class="wb-header">
+        <div>
+          <div class="mono-eyebrow">Authentication</div>
+          <div class="wb-title">Quản Lý API Keys Cho Client</div>
+        </div>
+        <button class="btn btn-p" onclick="openCreateKey()">＋ Tạo API Key Mới</button>
+      </div>
+      <div id="keysTable" class="table-wrap"></div>
+    </div>
+  </section>
+</main>
+
+<!-- Hallmark ⌘K Command Palette Dialog Overlay -->
+<div id="cmdPaletteModal" class="dialog" onclick="if(event.target===this)closeCommandPalette()">
+  <div class="cmd-palette-box">
+    <input id="cmdPaletteInput" class="cmd-palette-input" placeholder="Gõ lệnh hoặc điều hướng..." oninput="filterCommandPalette()" onkeydown="handleCmdKey(event)">
+    <div id="cmdPaletteList" class="cmd-palette-list">
+      <div class="cmd-group-title">ĐIỀU HƯỚNG NHANH</div>
+      <div class="cmd-item" onclick="execCmd(()=>switchTab('create'))"><span>🎬 Chuyển sang Studio Video AI</span><span class="kbd-shortcut">1</span></div>
+      <div class="cmd-item" onclick="execCmd(()=>switchTab('unwatermark'))"><span>⚡ Chuyển sang Tách Video Không Watermark</span><span class="kbd-shortcut">2</span></div>
+      <div class="cmd-item" onclick="execCmd(()=>switchTab('dash'))"><span>📊 Chuyển sang Thống Kê Pool</span><span class="kbd-shortcut">3</span></div>
+      <div class="cmd-item" onclick="execCmd(()=>switchTab('accounts'))"><span>👥 Quản lý Tài Khoản Dola</span><span class="kbd-shortcut">4</span></div>
+      <div class="cmd-item" onclick="execCmd(()=>switchTab('tasks'))"><span>⏳ Xem Hàng Đợi & Lịch Sử Tác Vụ</span><span class="kbd-shortcut">5</span></div>
+      <div class="cmd-item" onclick="execCmd(()=>switchTab('keys'))"><span>🔑 Quản lý API Keys</span><span class="kbd-shortcut">6</span></div>
+      
+      <div class="cmd-group-title" style="margin-top:8px">TÁC VỤ & HỖ TRỢ</div>
+      <div class="cmd-item" onclick="execCmd(openLoginAcc)"><span>🌐 Đăng Nhập Google (Headful Browser)</span></div>
+      <div class="cmd-item" onclick="execCmd(openAddAcc)"><span>🍪 Thêm Tài Khoản Bằng Cookie JSON</span></div>
+      <div class="cmd-item" onclick="execCmd(openDonateModal)"><span>☕ Ủng Hộ Tác Giả (QR MB Bank)</span></div>
+      <div class="cmd-item" onclick="execCmd(openProxyModal)"><span>🌐 Hướng Dẫn Cấu Hình Proxy (.env.local)</span></div>
+      <div class="cmd-item" onclick="execCmd(copyCurlSnippet)"><span>📋 Sao chép cURL mẫu cho lập trình viên</span></div>
+      <div class="cmd-item" onclick="execCmd(refresh)"><span>🔄 Làm mới toàn bộ dữ liệu</span><span class="kbd-shortcut">R</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Support / Donate Modal (VietQR MB Bank) -->
+<div id="donateModal" class="dialog" onclick="if(event.target===this)closeDonateModal()">
+  <div class="box" style="width:460px;text-align:center">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h2 style="margin:0;display:flex;align-items:center;gap:8px">☕ Ủng Hộ Tác Giả</h2>
+      <button class="btn btn-sm" onclick="closeDonateModal()">✕</button>
+    </div>
+    <p style="color:var(--color-ink-2);font-size:13px;line-height:1.6;margin-bottom:16px;text-align:left">
+      Dola Studio là dự án mã nguồn mở hoàn toàn miễn phí. Nếu công cụ hữu ích cho công việc của bạn, hãy gửi một ly cà phê ủng hộ tác giả duy trì & phát triển thêm các tính năng mới nhé!
+    </p>
+
+    <div style="display:flex;justify-content:center;margin-bottom:16px">
+      <div style="padding:8px;background:#ffffff;border:1px solid var(--color-rule);border-radius:var(--radius-md);box-shadow:var(--shadow-sm);display:inline-block">
+        <img src="https://img.vietqr.io/image/970422-1111666666116-compact2.png?amount=&addInfo=Ung%20ho%20Dola%20Studio&accountName=NGUYEN%20VAN%20HOANG" alt="VietQR MB Bank" style="width:230px;height:auto;display:block;border-radius:6px">
+      </div>
+    </div>
+
+    <div style="background:var(--color-paper-3);border:1px solid var(--color-rule);border-radius:var(--radius-md);padding:14px;text-align:left;font-size:13px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="color:var(--color-ink-2)">Ngân hàng:</span>
+        <span style="font-weight:600">MB Bank (Ngân hàng Quân Đội)</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="color:var(--color-ink-2)">Số tài khoản:</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <code style="font-family:var(--font-mono);font-weight:700;font-size:14px;color:var(--color-accent)">1111666666116</code>
+          <button class="btn btn-sm" onclick="copy('1111666666116');toast('Đã sao chép STK: 1111666666116','success')">Copy</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="color:var(--color-ink-2)">Chủ tài khoản:</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-weight:600;text-transform:uppercase">NGUYEN VAN HOANG</span>
+          <button class="btn btn-sm" onclick="copy('NGUYEN VAN HOANG');toast('Đã sao chép tên chủ tài khoản','success')">Copy</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:var(--color-ink-2)">Nội dung chuyển:</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-style:italic">Ung ho Dola Studio</span>
+          <button class="btn btn-sm" onclick="copy('Ung ho Dola Studio');toast('Đã sao chép nội dung chuyển khoản','success')">Copy</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-p" style="width:100%" onclick="closeDonateModal()">Cảm Ơn Sự Ủng Hộ Của Bạn! ❤️</button>
+  </div>
+</div>
+
+<!-- Bulk Reference Image URL Modal -->
+<div id="multiRefModal" class="dialog" onclick="if(event.target===this)closeMultiRefModal()">
+  <div class="box" style="width:520px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <h2 style="margin:0;display:flex;align-items:center;gap:8px">Dán Danh Sách Ảnh Tham Chiếu</h2>
+      <button class="btn btn-sm" onclick="closeMultiRefModal()">✕</button>
+    </div>
+    <p style="color:var(--color-ink-2);font-size:13px;line-height:1.5;margin-bottom:12px">
+      Dán danh sách các URL ảnh công khai, mỗi URL trên một dòng:
+    </p>
+    <textarea id="bulk_ref_textarea" class="form-control" style="min-height:160px;font-family:var(--font-mono);font-size:12.5px" placeholder="https://domain.com/photo1.jpg&#10;https://domain.com/photo2.png&#10;https://domain.com/photo3.webp"></textarea>
+    <div style="margin-top:16px;display:flex;justify-content:flex-end;gap:10px">
+      <button class="btn" onclick="closeMultiRefModal()">Hủy</button>
+      <button class="btn btn-p" onclick="submitBulkRefUrls()">Thêm Vào Danh Sách</button>
+    </div>
+  </div>
+</div>
+
+<!-- Proxy & Location Settings Modal -->
+<div id="proxyModal" class="dialog" onclick="if(event.target===this)closeProxyModal()">
+  <div class="box" style="width:620px;max-width:calc(100vw - 32px);max-height:90vh;overflow:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <h2 style="margin:0;display:flex;align-items:center;gap:8px">🌐 Proxy &amp; Vị Trí Gửi Cho Dola</h2>
+      <button class="btn btn-sm" onclick="closeProxyModal()">✕</button>
+    </div>
+    <p style="color:var(--color-ink-2);font-size:12.5px;line-height:1.55;margin:0 0 12px">
+      Dola (ByteDance) yêu cầu IP thuộc <b>Nhật Bản (JP)</b> hoặc <b>Hàn Quốc (KR)</b>. Ngôn ngữ, múi giờ, vùng và vị trí GPS gửi cho Dola mặc định <b>tự động lấy theo IP của proxy</b>; có thể nhập tay để cố định.
+      Thay đổi được lưu vào <code>.env.local</code> và áp dụng cho task kế tiếp, không cần khởi động lại server.
+    </p>
+
+    <div id="netEnvOverrideWarn" style="display:none;background:#fef3c7;border:1px solid #fde68a;border-radius:var(--radius-md);padding:8px 12px;color:#92400e;font-size:12px;margin-bottom:12px"></div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+      <span style="font-size:12px;color:var(--color-ink-3);align-self:center">Mẫu nhanh:</span>
+      <button class="btn btn-sm" onclick="applyNetPreset('auto')">🤖 Tự động theo proxy</button>
+      <button class="btn btn-sm" onclick="applyNetPreset('jp')">🇯🇵 Nhật Bản</button>
+      <button class="btn btn-sm" onclick="applyNetPreset('kr')">🇰🇷 Hàn Quốc</button>
+      <button class="btn btn-sm" onclick="applyNetPreset('clash')">Clash 127.0.0.1:7890</button>
+      <button class="btn btn-sm" onclick="applyNetPreset('direct')">Không proxy</button>
+    </div>
+
+    <div style="font-weight:700;font-size:12.5px;margin:4px 0 8px;color:var(--color-ink-1)">Proxy</div>
+    <div class="form-group">
+      <div class="form-label"><span>Địa chỉ proxy</span></div>
+      <input id="netProxy" class="form-control" style="font-family:var(--font-mono)" placeholder="http://127.0.0.1:7890 — để trống = không dùng proxy" autocomplete="off">
+      <div style="font-size:11.5px;color:var(--color-ink-3);margin-top:4px">Hỗ trợ <code>http://</code>, <code>https://</code>, <code>socks5://</code>. Có thể dán dạng <code>http://user:pass@host:port</code>.</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 12px">
+      <div class="form-group">
+        <div class="form-label"><span>Username (tùy chọn)</span></div>
+        <input id="netProxyUser" class="form-control" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <div class="form-label"><span>Password (tùy chọn)</span></div>
+        <input id="netProxyPass" type="password" class="form-control" autocomplete="new-password">
+        <label style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--color-ink-3);margin-top:4px">
+          <input type="checkbox" id="netProxyPassClear"> Xóa mật khẩu đã lưu
+        </label>
+      </div>
+    </div>
+    <div class="form-group">
+      <div class="form-label"><span>Bỏ qua proxy cho (tùy chọn)</span></div>
+      <input id="netProxyBypass" class="form-control" style="font-family:var(--font-mono)" placeholder="localhost,127.0.0.1">
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:10px 0 6px">
+      <div style="font-weight:700;font-size:12.5px;color:var(--color-ink-1)">Thông tin vị trí gửi cho Dola</div>
+      <button class="btn btn-sm" id="netDetectBtn" onclick="redetectNetwork()" title="Tra lại quốc gia / múi giờ / tọa độ của IP proxy đã lưu">🔄 Nhận diện lại theo proxy</button>
+    </div>
+    <div id="netDetectStatus" style="font-size:12px;font-family:var(--font-mono);color:var(--color-ink-2);background:var(--color-paper-3);border:1px solid var(--color-rule);border-radius:var(--radius-md);padding:6px 10px;margin-bottom:10px">-</div>
+    <div style="font-size:11.5px;color:var(--color-ink-3);margin:0 0 10px;line-height:1.5">
+      Múi giờ, region, GPS <b>để trống</b> sẽ <b>tự động</b> lấy theo IP của proxy. Không nhận diện được thì dùng mặc định Nhật (<code>Asia/Tokyo</code>, <code>JP</code>). Có nhập giá trị thì luôn dùng giá trị đó.
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 12px">
+      <div class="form-group">
+        <div class="form-label"><span>Ngôn ngữ giao diện Dola (DOLA_LOCALE)</span></div>
+        <select id="netLocale" class="form-control">
+          <option value="">Tiếng Việt (mặc định)</option>
+          <option value="en-US">English</option>
+          <option value="ja-JP">日本語 (Tiếng Nhật)</option>
+        </select>
+        <div class="net-eff" id="netEffLocale"></div>
+      </div>
+      <div class="form-group">
+        <div class="form-label"><span>Múi giờ (DOLA_TIMEZONE)</span></div>
+        <input id="netTimezone" class="form-control" list="netTimezoneList" style="font-family:var(--font-mono)" placeholder="Để trống = tự động">
+        <datalist id="netTimezoneList">
+          <option value="Asia/Tokyo"><option value="Asia/Seoul"><option value="Asia/Taipei"><option value="Asia/Hong_Kong"><option value="Asia/Singapore"><option value="UTC">
+        </datalist>
+        <div class="net-eff" id="netEffTimezone"></div>
+      </div>
+      <div class="form-group">
+        <div class="form-label"><span>Region API (DOLA_REGION)</span></div>
+        <input id="netRegion" class="form-control" list="netRegionList" maxlength="2" style="font-family:var(--font-mono);text-transform:uppercase" placeholder="Để trống = tự động">
+        <datalist id="netRegionList"><option value="JP"><option value="KR"></datalist>
+        <div class="net-eff" id="netEffRegion"></div>
+      </div>
+      <div class="form-group">
+        <div class="form-label"><span>GPS vĩ độ,kinh độ (DOLA_GEOLOCATION)</span></div>
+        <input id="netGeo" class="form-control" list="netGeoList" style="font-family:var(--font-mono)" placeholder="Để trống = tự động · off = không gửi">
+        <datalist id="netGeoList"><option value="off"><option value="35.6762,139.6503"><option value="37.5665,126.9780"></datalist>
+        <div class="net-eff" id="netEffGeo"></div>
+      </div>
+    </div>
+    <div style="font-size:11.5px;color:var(--color-ink-3);margin:-4px 0 12px;line-height:1.5">
+      Ngôn ngữ giao diện không đi theo proxy: mặc định tiếng Việt, có thể chọn English hoặc tiếng Nhật.
+    </div>
+
+    <div id="netTestResult" style="display:none;border-radius:var(--radius-md);padding:8px 12px;font-size:12.5px;margin-bottom:12px;font-family:var(--font-mono)"></div>
+
+    <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <button class="btn" id="netTestBtn" onclick="testNetworkSettings()" title="Kiểm tra IP / quốc gia đi ra qua proxy đang nhập">🔎 Kiểm tra IP</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn" onclick="closeProxyModal()">Hủy</button>
+        <button class="btn btn-p" id="netSaveBtn" onclick="saveNetworkSettings()">💾 Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Generic Form Dialog (Only dismissible via explicit close/cancel buttons) -->
+<div id="dlg" class="dialog"><div class="box" id="dlgBox"></div></div>
+
+<!-- Fullscreen Video Preview Dialog -->
+<div id="videoModal" class="dialog" onclick="if(event.target===this)closeVideo()">
+  <div class="box" style="width:680px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h2 style="margin:0">Xem Video</h2>
+      <button class="btn btn-sm" onclick="closeVideo()">✕</button>
+    </div>
+    <video id="videoEl" controls autoplay style="width:100%;border-radius:var(--radius-md);background:#000;display:block"></video>
+    <div style="margin-top:14px;display:flex;justify-content:flex-end">
+      <button class="btn" onclick="closeVideo()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- ================= JAVASCRIPT ================= -->
+<script>
+const LS_KEY = 'dola_admin_key';
+let adminKey = localStorage.getItem(LS_KEY) || '';
+let autoRefresh = true, curTab = 'create', timer = null;
+let activePollTimer = null, currentVideoUrl = '';
+let referenceImagesList = [];
+
+function q(s) { return document.querySelector(s); }
+
+function show(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (el.classList.contains('dialog') || el.classList.contains('mask')) {
+    el.style.display = 'flex';
+  } else {
+    el.style.display = 'block';
+  }
+}
+
+function hide(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function fmt(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts * 1000);
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function toast(msg, type = 'info') {
+  const container = q('#toastContainer');
+  if (!container) return;
+  const t = document.createElement('div');
+  t.className = 'toast toast-' + type;
+  let icon = 'ℹ';
+  if (type === 'success') icon = '✓';
+  if (type === 'error') icon = '✕';
+  t.innerHTML = `<span style="font-weight:700;color:var(--color-accent)">${icon}</span><span>${esc(msg)}</span>`;
+  container.appendChild(t);
+  setTimeout(() => t.classList.add('toast-show'), 10);
+  setTimeout(() => {
+    t.classList.remove('toast-show');
+    t.classList.add('toast-hide');
+    setTimeout(() => t.remove(), 250);
+  }, 3200);
+}
+
+function copy(text) {
+  navigator.clipboard.writeText(text).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+  });
+}
+
+/* API Fetch Wrapper */
+async function api(path, opt = {}) {
+  const h = Object.assign({}, opt.headers || {});
+  if (adminKey) h['X-Admin-Key'] = adminKey;
+  if (opt.body && !h['Content-Type']) h['Content-Type'] = 'application/json';
+  
+  const res = await fetch(path, { credentials: 'omit', ...opt, headers: h });
+  if (res.status === 401) {
+    promptAdminKey();
+    throw new Error('Cần nhập mã X-Admin-Key');
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }));
+    let msg = '';
+    if (Array.isArray(err.detail)) {
+      msg = err.detail.map(d => {
+        const field = d.loc ? d.loc.filter(x => x !== 'body').join('.') : '';
+        return (field ? `${field}: ` : '') + (d.msg || JSON.stringify(d));
+      }).join('; ');
+    } else if (typeof err.detail === 'object' && err.detail !== null) {
+      msg = JSON.stringify(err.detail);
+    } else {
+      msg = err.detail || JSON.stringify(err);
+    }
+    throw new Error(msg || `Lỗi kết nối (${res.status})`);
+  }
+  return res.json();
+}
+
+function promptAdminKey() {
+  const key = prompt('Nhập X-Admin-Key (để trống nếu server đang bật dev-mode):', adminKey);
+  if (key !== null) {
+    adminKey = key.trim();
+    localStorage.setItem(LS_KEY, adminKey);
+    refresh();
+  }
+}
+
+function logout() {
+  localStorage.removeItem(LS_KEY);
+  adminKey = '';
+  toast('Đã xóa thông tin khóa quản trị.', 'info');
+  setTimeout(refresh, 400);
+}
+
+/* Tab Navigation */
+function switchTab(t) {
+  curTab = t;
+  document.querySelectorAll('main > section').forEach(s => s.style.display = 'none');
+  document.querySelectorAll('.nav-item').forEach(b => {
+    b.classList.toggle('active', b.getAttribute('data-tab') === t);
+  });
+  
+  const target = q('#tab-' + t);
+  if (target) target.style.display = 'block';
+  
+  if (t === 'dash') loadDash();
+  if (t === 'accounts') loadAccounts();
+  if (t === 'tasks') loadTasks();
+  if (t === 'keys') loadKeys();
+  if (t === 'unwatermark') loadDownloads();
+  if (t === 'create') {
+    checkAccountWarning();
+    updateApiPayloadPreview();
+  }
+}
+
+/* ---- Hallmark 05 · Workbench Studio Logic ---- */
+function selectModelPill(modelVal) {
+  q('#gen_model').value = modelVal;
+  document.querySelectorAll('#modelPillGroup .pill-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-val') === modelVal);
+  });
+  updateApiPayloadPreview();
+}
+
+function setPresetPrompt(p) {
+  q('#gen_prompt').value = p;
+  updatePromptCount();
+  updateApiPayloadPreview();
+}
+
+function updatePromptCount() {
+  const val = q('#gen_prompt').value;
+  q('#prompt_char_count').textContent = `${val.length} ký tự`;
+}
+
+function getRefUrls() {
+  return referenceImagesList.map(item => {
+    if (typeof item === 'string') return item;
+    return item.url || item.name || item.previewUrl;
+  }).filter(Boolean);
+}
+
+function updateApiPayloadPreview() {
+  const p = q('#gen_prompt').value;
+  const m = q('#gen_model').value;
+  const r = q('#gen_ratio').value;
+  const d = parseInt(q('#gen_duration').value);
+  const pendingInput = q('#gen_ref_input') ? q('#gen_ref_input').value.trim() : '';
+  let refs = getRefUrls();
+  if (pendingInput && (pendingInput.startsWith('http://') || pendingInput.startsWith('https://')) && !refs.includes(pendingInput)) {
+    refs.push(pendingInput);
+  }
+
+  const payload = {
+    model: m,
+    prompt: p || "A cinematic shot of a futuristic cyberpunk skyline...",
+    ratio: r,
+    duration: d,
+    reference_images: refs
+  };
+
+  const el = q('#api_payload_preview');
+  if (el) el.textContent = JSON.stringify(payload, null, 2);
+}
+
+function copyCurlSnippet() {
+  const p = q('#gen_prompt').value || "A cinematic shot...";
+  const m = q('#gen_model').value;
+  const r = q('#gen_ratio').value;
+  const d = parseInt(q('#gen_duration').value);
+  const curl = `curl -X POST http://127.0.0.1:8000/v1/videos/generations \\
+  -H "Content-Type: application/json" \\
+  -d '${JSON.stringify({ model: m, prompt: p, ratio: r, duration: d, reference_images: getRefUrls() })}'`;
+  copy(curl);
+  toast('Đã sao chép cURL snippet vào clipboard!', 'success');
+}
+
+/* Reference Images Multi-Selector & Ordering */
+function renderRefImages() {
+  const container = q('#ref_images_container');
+  const countEl = q('#ref_img_count');
+  const clearBtn = q('#ref_clear_all_btn');
+  if (!container || !countEl) return;
+
+  countEl.textContent = `${referenceImagesList.length} / 10 ảnh`;
+  if (referenceImagesList.length > 0) {
+    container.style.display = 'grid';
+    if (clearBtn) clearBtn.style.display = 'inline-block';
+    countEl.classList.add('b-blue');
+  } else {
+    container.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = 'none';
+    countEl.classList.remove('b-blue');
+  }
+
+  container.innerHTML = referenceImagesList.map((item, idx) => {
+    const isObj = typeof item === 'object' && item !== null;
+    const previewUrl = isObj ? (item.previewUrl || item.url) : item;
+    const displayName = isObj ? item.name : item;
+    const isLocal = isObj && item.type === 'local';
+    let sizeStr = '';
+    if (isObj && item.size) {
+      sizeStr = `(${(item.size / 1024 / 1024).toFixed(1)} MB)`;
+    }
+
+    return `
+      <div class="ref-thumb-card" style="padding:7px 10px;gap:9px">
+        <img src="${esc(previewUrl)}" alt="Ref #${idx+1}" onerror="this.style.display='none';const fb=this.parentElement.querySelector('.ref-fallback-icon');if(fb)fb.style.display='flex';" style="width:42px;height:42px;border-radius:6px;object-fit:cover;border:1px solid var(--color-rule);flex-shrink:0;background:var(--color-paper-3)">
+        <div class="ref-fallback-icon" style="display:none;width:42px;height:42px;border-radius:6px;border:1px solid var(--color-rule);background:var(--color-paper-3);align-items:center;justify-content:center;color:var(--color-ink-3);font-size:10px;font-weight:600;flex-shrink:0">IMG</div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+            <span class="badge b-blue" style="padding:1px 6px;font-size:10.5px;font-weight:700;line-height:1.2">#${idx + 1}</span>
+            <span style="font-size:10px;color:var(--color-ink-3);font-weight:600;text-transform:uppercase">${isLocal ? '📁 MÁY TÍNH' : '🌐 URL'} ${sizeStr}</span>
+          </div>
+          <div style="font-size:11.5px;font-family:var(--font-mono);color:var(--color-ink-1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(displayName)}">${esc(displayName)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:3px;flex-shrink:0">
+          <button type="button" class="btn btn-sm" style="padding:2px 6px;font-size:11px" onclick="moveRefImage(${idx}, -1)" ${idx === 0 ? 'disabled style="opacity:0.25;cursor:not-allowed"' : ''} title="Đổi lên trước">▲</button>
+          <button type="button" class="btn btn-sm" style="padding:2px 6px;font-size:11px" onclick="moveRefImage(${idx}, 1)" ${idx === referenceImagesList.length - 1 ? 'disabled style="opacity:0.25;cursor:not-allowed"' : ''} title="Đổi xuống sau">▼</button>
+          <button type="button" class="btn btn-sm" style="padding:2px 6px;color:var(--color-danger);margin-left:2px" onclick="removeRefImage(${idx})" title="Xóa ảnh">✕</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  updateApiPayloadPreview();
+}
+
+function moveRefImage(idx, dir) {
+  const target = idx + dir;
+  if (target < 0 || target >= referenceImagesList.length) return;
+  const temp = referenceImagesList[idx];
+  referenceImagesList[idx] = referenceImagesList[target];
+  referenceImagesList[target] = temp;
+  renderRefImages();
+  toast(`Đã đổi vị trí ảnh thành #${target + 1}`, 'info');
+}
+
+function handleLocalFilesSelected(event) {
+  const files = event.target ? event.target.files : event;
+  if (!files || files.length === 0) return;
+  addLocalFiles(Array.from(files));
+  if (event.target) event.target.value = '';
+}
+
+function handleDropRefFiles(event) {
+  event.preventDefault();
+  const dropzone = q('#ref_dropzone');
+  if (dropzone) {
+    dropzone.style.borderColor = 'var(--color-rule)';
+    dropzone.style.background = 'var(--color-paper-2)';
+  }
+  const dt = event.dataTransfer;
+  if (dt && dt.files && dt.files.length > 0) {
+    addLocalFiles(Array.from(dt.files));
+  }
+}
+
+function addLocalFiles(fileList) {
+  let added = 0;
+  for (const file of fileList) {
+    if (!file.type.startsWith('image/') && !file.name.match(/\.(jpg|jpeg|png|webp)$/i)) {
+      toast(`File "${file.name}" không phải định dạng ảnh hỗ trợ!`, 'error');
+      continue;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      toast(`File "${file.name}" vượt quá giới hạn 15MB!`, 'error');
+      continue;
+    }
+    if (referenceImagesList.length >= 10) {
+      toast('Đã đạt giới hạn tối đa 10 ảnh tham chiếu của Dola!', 'error');
+      break;
+    }
+    const item = {
+      id: 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+      type: 'local',
+      file: file,
+      name: file.name,
+      size: file.size,
+      previewUrl: URL.createObjectURL(file),
+      url: null
+    };
+    referenceImagesList.push(item);
+    added++;
+  }
+  renderRefImages();
+  if (added > 0) {
+    toast(`Đã thêm ${added} ảnh từ máy tính theo thứ tự chọn!`, 'success');
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+    reader.readAsDataURL(file);
+  });
+}
+
+function addRefImage() {
+  const input = q('#gen_ref_input');
+  if (!input) return;
+  const val = input.value.trim();
+  if (!val) return;
+  if (!val.startsWith('http://') && !val.startsWith('https://')) {
+    return toast('Vui lòng nhập đường dẫn URL hợp lệ (http:// hoặc https://)', 'error');
+  }
+  if (referenceImagesList.length >= 10) {
+    return toast('Đã đạt giới hạn tối đa 10 ảnh tham chiếu của Dola!', 'error');
+  }
+  const exists = referenceImagesList.some(i => (typeof i === 'string' ? i === val : i.url === val));
+  if (exists) {
+    return toast('Ảnh này đã có trong danh sách tham chiếu!', 'info');
+  }
+  referenceImagesList.push({
+    id: 'url_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+    type: 'url',
+    file: null,
+    name: val,
+    size: null,
+    previewUrl: val,
+    url: val
+  });
+  input.value = '';
+  renderRefImages();
+  toast(`Đã thêm ảnh tham chiếu #${referenceImagesList.length}`, 'success');
+}
+
+function removeRefImage(idx) {
+  if (idx >= 0 && idx < referenceImagesList.length) {
+    const item = referenceImagesList[idx];
+    if (typeof item === 'object' && item.previewUrl && item.previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(item.previewUrl);
+    }
+    referenceImagesList.splice(idx, 1);
+    renderRefImages();
+  }
+}
+
+function clearAllRefImages() {
+  if (confirm('Bạn có chắc muốn xóa tất cả ảnh tham chiếu?')) {
+    referenceImagesList.forEach(item => {
+      if (typeof item === 'object' && item.previewUrl && item.previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(item.previewUrl);
+      }
+    });
+    referenceImagesList = [];
+    renderRefImages();
+    toast('Đã làm trống danh sách ảnh tham chiếu', 'info');
+  }
+}
+
+function openMultiRefModal() {
+  show('multiRefModal');
+  const txt = q('#bulk_ref_textarea');
+  if (txt) { txt.value = ''; setTimeout(() => txt.focus(), 50); }
+}
+function closeMultiRefModal() { hide('multiRefModal'); }
+
+function submitBulkRefUrls() {
+  const txt = q('#bulk_ref_textarea');
+  if (!txt) return;
+  const lines = txt.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length === 0) return toast('Vui lòng nhập ít nhất một đường dẫn ảnh!', 'error');
+  let added = 0;
+  for (const line of lines) {
+    if (line.startsWith('http://') || line.startsWith('https://')) {
+      const exists = referenceImagesList.some(i => (typeof i === 'string' ? i === line : i.url === line));
+      if (!exists && referenceImagesList.length < 10) {
+        referenceImagesList.push({
+          id: 'url_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+          type: 'url',
+          file: null,
+          name: line,
+          size: null,
+          previewUrl: line,
+          url: line
+        });
+        added++;
+      }
+    }
+  }
+  closeMultiRefModal();
+  renderRefImages();
+  if (added > 0) toast(`Đã thêm thành công ${added} ảnh tham chiếu theo thứ tự!`, 'success');
+}
+
+/* Video Generation Submit & Polling */
+async function checkAccountWarning() {
+  try {
+    const st = await api('/api/admin/stats');
+    const hasAcc = (st.total_accounts || 0) > 0;
+    const warn = q('#noAccWarn');
+    if (warn) warn.style.display = hasAcc ? 'none' : 'block';
+    const statusText = q('#poolStatusText');
+    if (statusText) statusText.textContent = hasAcc ? `${st.total_accounts} ACCOUNTS ONLINE` : 'NO ACCOUNTS';
+    const proxyStatus = q('#proxyStatusText');
+    if (proxyStatus) proxyStatus.textContent = st.proxy ? (st.proxy.length > 24 ? st.proxy.slice(0, 22) + '…' : st.proxy) : 'Direct';
+    const accProxyDisplay = q('#accProxyDisplay');
+    if (accProxyDisplay) accProxyDisplay.textContent = st.proxy || 'Direct / None';
+    const setText = (sel, val) => { const el = q(sel); if (el) el.textContent = val || '-'; };
+    setText('#accLocaleDisplay', st.locale);
+    setText('#accTimezoneDisplay', st.timezone);
+    setText('#accRegionDisplay', st.region);
+    setText('#accGeoDisplay', st.geolocation || 'Tắt');
+  } catch (e) {}
+}
+
+async function submitGenerateVideo() {
+  const model = q('#gen_model').value;
+  const prompt = q('#gen_prompt').value.trim();
+  if (!prompt) return toast('Vui lòng nhập mô tả (Prompt) video bạn muốn tạo!', 'error');
+  const ratio = q('#gen_ratio').value;
+  const duration = parseInt(q('#gen_duration').value);
+
+  const pendingInput = q('#gen_ref_input') ? q('#gen_ref_input').value.trim() : '';
+  if (pendingInput && (pendingInput.startsWith('http://') || pendingInput.startsWith('https://'))) {
+    const exists = referenceImagesList.some(i => (typeof i === 'string' ? i === pendingInput : i.url === pendingInput));
+    if (!exists && referenceImagesList.length < 10) {
+      referenceImagesList.push({
+        id: 'url_' + Date.now(),
+        type: 'url',
+        file: null,
+        name: pendingInput,
+        size: null,
+        previewUrl: pendingInput,
+        url: pendingInput
+      });
+      renderRefImages();
+    }
+  }
+
+  const btn = q('#btn_submit_gen');
+  btn.disabled = true;
+  q('#gen_msg').textContent = 'Đang xử lý ảnh tham chiếu...';
+  q('#gen_status_badge').className = 'badge b-amber';
+  q('#gen_status_badge').textContent = 'Processing';
+  q('#gen_status_box').style.background = 'var(--color-paper-3)';
+  q('#gen_status_box').style.border = '1px solid var(--color-rule)';
+  q('#gen_spinner').style.display = 'inline-block';
+  hide('gen_video_container');
+
+  try {
+    // 1. Upload any local files from computer in strict user-selected sequence
+    const localItems = referenceImagesList.filter(i => (typeof i === 'object' && i.file && !i.url));
+    if (localItems.length > 0) {
+      q('#gen_status_text').textContent = `Đang tải ${localItems.length} ảnh từ máy tính lên server theo thứ tự...`;
+      let upData = null;
+      let uploadErr = null;
+      try {
+        const formData = new FormData();
+        for (const item of localItems) {
+          formData.append('files', item.file, item.name);
+        }
+        const upResp = await fetch('/api/upload-reference-images', {
+          method: 'POST',
+          body: formData
+        });
+        if (upResp.ok) {
+          upData = await upResp.json();
+        } else {
+          const errJson = await upResp.json().catch(() => ({}));
+          uploadErr = errJson.detail || `Server báo lỗi HTTP ${upResp.status}`;
+        }
+      } catch (e) {
+        uploadErr = e.message || 'Lỗi kết nối khi tải ảnh';
+      }
+
+      // Dự phòng: Nếu multipart tải không thành công, tự động chuyển đổi sang Base64
+      if (!upData) {
+        q('#gen_status_text').textContent = `Đang tải ${localItems.length} ảnh bằng chế độ dự phòng (Base64)...`;
+        try {
+          const b64List = [];
+          for (const item of localItems) {
+            const b64 = await fileToBase64(item.file);
+            b64List.push({ name: item.name, data: b64 });
+          }
+          const upResp2 = await fetch('/api/upload-reference-images', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ images: b64List })
+          });
+          if (upResp2.ok) {
+            upData = await upResp2.json();
+          } else {
+            const errJson2 = await upResp2.json().catch(() => ({}));
+            throw new Error(errJson2.detail || uploadErr || 'Lỗi khi tải ảnh từ máy tính lên server');
+          }
+        } catch (e2) {
+          throw new Error(e2.message || uploadErr || 'Lỗi khi tải ảnh từ máy tính lên server');
+        }
+      }
+
+      let upIdx = 0;
+      for (const item of referenceImagesList) {
+        if (typeof item === 'object' && item.file && !item.url) {
+          if (upData && upData.images && upData.images[upIdx]) {
+            item.url = upData.images[upIdx].url;
+            upIdx++;
+          }
+        }
+      }
+    }
+
+    // 2. Build final reference images list strictly preserving user's order
+    const finalRefImages = referenceImagesList.map(item => {
+      if (typeof item === 'string') return item;
+      return item.url || item.previewUrl;
+    }).filter(Boolean);
+
+    q('#gen_status_text').textContent = 'Đang khởi tạo tác vụ (Creating task)...';
+
+    const body = {
+      model: model,
+      prompt: prompt,
+      ratio: ratio,
+      duration: duration,
+      reference_images: finalRefImages
+    };
+
+    const resp = await fetch('/v1/videos/generations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.detail || JSON.stringify(data));
+
+    q('#gen_msg').textContent = 'Task ID: ' + data.id;
+    pollVideoTask(data.id);
+  } catch (err) {
+    btn.disabled = false;
+    q('#gen_msg').textContent = '';
+    q('#gen_spinner').style.display = 'none';
+    q('#gen_status_badge').className = 'badge b-red';
+    q('#gen_status_badge').textContent = 'Failed';
+    q('#gen_status_box').style.background = 'var(--color-danger-subtle)';
+    q('#gen_status_box').style.border = '1px solid var(--color-danger-border)';
+    q('#gen_status_text').innerHTML = '<span style="color:var(--color-danger)"><b>Lỗi:</b> ' + esc(err.message) + '</span>';
+  }
+}
+
+function pollVideoTask(taskId) {
+  if (activePollTimer) clearInterval(activePollTimer);
+  let elapsed = 0;
+
+  activePollTimer = setInterval(async () => {
+    elapsed += 3;
+    try {
+      const resp = await fetch(`/v1/videos/${taskId}`);
+      const data = await resp.json();
+
+      if (data.status === 'processing') {
+        q('#gen_status_text').innerHTML = `Đang xử lý render video qua Dola automation... (${elapsed}s)`;
+      } else if (data.status === 'queued') {
+        q('#gen_status_text').innerHTML = `Đang xếp hàng chờ tài khoản khả dụng... (${elapsed}s)`;
+      } else if (data.status === 'completed') {
+        clearInterval(activePollTimer);
+        q('#btn_submit_gen').disabled = false;
+        q('#gen_spinner').style.display = 'none';
+        q('#gen_status_badge').className = 'badge b-green';
+        q('#gen_status_badge').textContent = 'Completed';
+        q('#gen_status_box').style.background = 'var(--color-success-subtle)';
+        q('#gen_status_box').style.border = '1px solid var(--color-success-border)';
+        q('#gen_status_text').innerHTML = `<span style="color:var(--color-success);font-weight:600">✓ Video đã render hoàn tất thành công trong ${elapsed} giây!</span>`;
+
+        currentVideoUrl = data.video_url;
+        const videoEl = q('#gen_video_player');
+        videoEl.src = data.video_url;
+        show('gen_video_container');
+        const dlBtn = q('#gen_download_btn');
+        dlBtn.href = data.video_url;
+        dlBtn.download = `video_${taskId}.mp4`;
+        toast('Render video thành công!', 'success');
+      } else if (data.status === 'failed') {
+        clearInterval(activePollTimer);
+        q('#btn_submit_gen').disabled = false;
+        q('#gen_spinner').style.display = 'none';
+        q('#gen_status_badge').className = 'badge b-red';
+        q('#gen_status_badge').textContent = 'Failed';
+        q('#gen_status_box').style.background = 'var(--color-danger-subtle)';
+        q('#gen_status_box').style.border = '1px solid var(--color-danger-border)';
+        q('#gen_status_text').innerHTML = `<span style="color:var(--color-danger)"><b>Thất bại:</b> ${esc(data.error || 'Quá trình sinh video gặp sự cố')}</span>`;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, 3000);
+}
+
+function copyGenUrl() {
+  if (!currentVideoUrl) return;
+  copy(currentVideoUrl);
+  toast('Đã sao chép liên kết video vào clipboard!', 'success');
+}
+
+/* ---- Unwatermarked Extraction Tab Logic ---- */
+async function submitExtractClean() {
+  const inp = q('#clean_input').value.trim();
+  if (!inp) return toast('Vui lòng nhập link hoặc Conversation ID!', 'error');
+
+  const btn = q('#btn_clean_submit');
+  btn.disabled = true;
+  btn.textContent = 'Đang trích xuất...';
+  show('clean_result_box');
+  q('#clean_msg').innerHTML = '<span class="spinner"></span> Đang kết nối tới Dola CDN và giải mã luồng master 1080P...';
+  hide('clean_video_wrap');
+
+  try {
+    const res = await api('/api/clean-video', {
+      method: 'POST',
+      body: JSON.stringify({ input: inp })
+    });
+
+    btn.disabled = false;
+    btn.textContent = 'Tải Không Logo';
+    q('#clean_msg').innerHTML = `<span style="color:var(--color-success);font-weight:600">✓ Đã trích xuất video gốc thành công!</span>`;
+    currentVideoUrl = res.url;
+    const vEl = q('#clean_video_player');
+    vEl.src = res.url;
+    show('clean_video_wrap');
+    const dlBtn = q('#clean_download_btn');
+    dlBtn.href = res.url;
+    dlBtn.download = res.filename || 'dola_clean_video.mp4';
+    loadDownloads();
+    toast('Trích xuất thành công video không watermark!', 'success');
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Tải Không Logo';
+    q('#clean_msg').innerHTML = `<span style="color:var(--color-danger)"><b>Lỗi trích xuất:</b> ${esc(err.message)}</span>`;
+  }
+}
+
+async function loadDownloads() {
+  try {
+    const res = await api('/api/downloads');
+    const files = res.files || [];
+    const rows = files.map(f => [
+      `<span style="font-weight:600;font-family:var(--font-mono)">${esc(f.name)}</span>`,
+      `${f.size_mb} MB`,
+      fmt(f.modified_at),
+      `<div style="display:flex;gap:6px">
+        <a class="btn btn-sm btn-p" href="${esc(f.url)}" download="${esc(f.name)}" target="_blank">📥 Tải về</a>
+        <button class="btn btn-sm" onclick="playVideo('${esc(f.url)}')">▶ Xem</button>
+        <button class="btn btn-sm" onclick="copy('${window.location.origin}${esc(f.url)}');toast('Đã sao chép liên kết!','success')">📋 Copy</button>
+      </div>`
+    ]);
+    q('#downloadsTable').innerHTML = table(['Tên Video', 'Dung lượng', 'Thời gian tạo', 'Thao tác'], rows);
+  } catch (e) {
+    q('#downloadsTable').innerHTML = '<div style="padding:24px;text-align:center;color:var(--color-ink-3)">Chưa có video nào trong thư mục downloads.</div>';
+  }
+}
+
+/* Dashboard Stats Tab */
+async function loadDash() {
+  try {
+    const st = await api('/api/admin/stats');
+    const allTotal = st.all_time_total !== undefined ? st.all_time_total : (st.total_tasks || 0);
+    const allComp = st.all_time_completed !== undefined ? st.all_time_completed : (st.completed_tasks || 0);
+    const todayTot = st.today_total !== undefined ? st.today_total : ((st.today_completed || 0) + (st.today_failed || 0));
+    const todayComp = st.today_completed || 0;
+
+    q('#st_total_tasks').textContent = allTotal;
+    if (q('#st_total_subtext')) q('#st_total_subtext').textContent = `Hôm nay: ${todayTot} · Toàn thời gian: ${allTotal}`;
+
+    q('#st_completed_tasks').textContent = allComp;
+    if (q('#st_completed_subtext')) q('#st_completed_subtext').textContent = `Hôm nay: ${todayComp} · Toàn thời gian: ${allComp}`;
+
+    let rate = 0;
+    if (st.all_time_success_rate !== undefined && st.all_time_success_rate !== null) {
+      rate = Math.round(st.all_time_success_rate * 100);
+    } else if (allTotal > 0) {
+      rate = Math.round((allComp / allTotal) * 100);
+    }
+    q('#st_success_rate').textContent = rate + '%';
+    if (q('#st_rate_subtext')) q('#st_rate_subtext').textContent = allTotal > 0 ? `${allComp}/${allTotal} tác vụ hoàn tất` : 'Chưa có tác vụ';
+
+    q('#st_accounts').textContent = st.total_accounts || 0;
+    q('#st_active_accounts').textContent = st.available_accounts || 0;
+    q('#st_busy_accounts').textContent = st.busy_accounts || 0;
+
+    const days = st.trend || st.per_day || [];
+    if (days.length > 0) {
+      const maxVal = Math.max(...days.map(d => Math.max(d.total || 0, (d.completed || 0) + (d.failed || 0), 1)));
+      q('#trendChart').innerHTML = days.map(d => {
+        const comp = d.completed || 0;
+        const fail = d.failed || 0;
+        const tot = d.total !== undefined ? d.total : (comp + fail);
+        const hComp = comp > 0 ? Math.max(8, Math.round((comp / maxVal) * 120)) : 0;
+        const hFail = fail > 0 ? Math.max(8, Math.round((fail / maxVal) * 120)) : 0;
+        const dayLabel = d.day || (d.date ? d.date.slice(5) : '');
+
+        return `
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end" title="Ngày ${dayLabel}: ${comp} thành công, ${fail} thất bại (Tổng: ${tot})">
+            <div style="font-family:var(--font-mono);font-size:11px;font-weight:600;margin-bottom:6px;color:${tot > 0 ? 'var(--color-ink-1)' : 'var(--color-ink-3)'}">
+              ${tot > 0 ? tot : '0'}
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:5px;width:100%;justify-content:center;height:120px;border-bottom:2px solid var(--color-rule)">
+              <div style="width:16px;height:${hComp}px;background:#16a34a;border-radius:3px 3px 0 0;min-height:${comp > 0 ? '6px' : '0'};transition:height 0.2s" title="${comp} thành công"></div>
+              <div style="width:16px;height:${hFail}px;background:#cbd5e1;border-radius:3px 3px 0 0;min-height:${fail > 0 ? '6px' : '0'};transition:height 0.2s" title="${fail} thất bại"></div>
+            </div>
+            <div style="font-family:var(--font-mono);font-size:11px;color:var(--color-ink-2);margin-top:8px;font-weight:600">${esc(dayLabel)}</div>
+          </div>
+        `;
+      }).join('');
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+/* Accounts Tab */
+async function toggleScheduling(name, on) {
+  try {
+    await api(`/api/admin/accounts/${name}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ scheduling: on })
+    });
+    toast(`Đã ${on ? 'bật' : 'tắt'} điều phối tài khoản ${name}`, 'info');
+    loadAccounts();
+    checkAccountWarning();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+async function loadAccounts() {
+  try {
+    const res = await api('/api/admin/accounts');
+    const list = Array.isArray(res) ? res : (res && res.accounts ? res.accounts : []);
+    const rows = list.map(a => {
+      let stateBadge = '<span class="badge b-green">Hoạt động</span>';
+      if (a.busy) stateBadge = '<span class="badge b-amber">Đang render</span>';
+      else if (a.cooling) stateBadge = '<span class="badge b-amber">Chờ mở rate limit</span>';
+      else if (a.quota_blocked) stateBadge = '<span class="badge b-red">Hết Quota</span>';
+      else if (a.rate_limited || (a.used_today >= a.limit)) stateBadge = '<span class="badge b-amber">Đạt hạn mức</span>';
+      else if (!a.scheduling) stateBadge = '<span class="badge">Đã tắt</span>';
+
+      const schedToggle = `
+        <label class="switch-toggle" title="${a.scheduling ? 'Đang bật điều phối' : 'Đang tắt điều phối'}">
+          <input type="checkbox" ${a.scheduling ? 'checked' : ''} onchange="toggleScheduling('${esc(a.name)}', this.checked)">
+          <span class="slider"></span>
+        </label>
+      `;
+
+      const limitDisplay = `
+        <span style="font-family:var(--font-mono);font-weight:700;color:${(a.used_today || 0) >= (a.limit || 2) ? 'var(--color-warning)' : 'var(--color-ink-1)'}">${a.used_today || 0}</span>
+        <span style="font-family:var(--font-mono);color:var(--color-ink-3)">/ ${a.limit || 2} (lượt)</span>
+      `;
+
+      return [
+        `<span style="font-weight:600;font-family:var(--font-mono)">${esc(a.name)}</span>`,
+        stateBadge,
+        schedToggle,
+        limitDisplay,
+        `<span style="font-family:var(--font-mono);font-size:12px">${fmt(a.last_used_at)}</span>`,
+        `<div style="display:flex;gap:6px">
+          <button class="btn btn-sm" onclick="delAccount('${esc(a.name)}')">Xóa</button>
+        </div>`
+      ];
+    });
+    q('#accountsTable').innerHTML = table(['Tài Khoản', 'Trạng Thái', 'Điều Phối', 'Hạn Mức Hôm Nay', 'Sử Dụng Lần Cuối', 'Thao Tác'], rows);
+  } catch (e) {
+    q('#accountsTable').innerHTML = `<div style="padding:24px;text-align:center;color:var(--color-ink-3)">${esc(e.message)}</div>`;
+  }
+}
+
+async function delAccount(name) {
+  if (!confirm(`Xóa tài khoản ${name} khỏi hệ thống?`)) return;
+  try {
+    await api(`/api/admin/accounts/${name}`, { method: 'DELETE' });
+    toast(`Đã xóa tài khoản ${name}`, 'success');
+    loadAccounts();
+    checkAccountWarning();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+function openAddAcc() {
+  const existingRows = document.querySelectorAll('#accountsTable tr td:first-child');
+  const existingNames = Array.from(existingRows).map(el => el.textContent.trim());
+  let nextIdx = 1;
+  while (existingNames.includes(`acc${nextIdx}`)) nextIdx++;
+  const defaultName = `acc${nextIdx}`;
+
+  q('#dlgBox').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h2 style="margin:0;display:flex;align-items:center;gap:8px">🍪 Thêm Tài Khoản Bằng Cookie</h2>
+      <button class="btn btn-sm" onclick="hide('dlg')">✕</button>
+    </div>
+    <div class="form-group">
+      <div class="form-label"><span>Tên định danh profile</span></div>
+      <input id="accNameInp" class="form-control" value="${esc(defaultName)}" placeholder="acc1">
+      <div style="font-size:11.5px;color:var(--color-ink-3);margin-top:4px">Định dạng tên: chỉ gồm chữ cái, số, dấu gạch dưới (VD: acc1, acc2, dola_user).</div>
+    </div>
+    <div class="form-group">
+      <div class="form-label"><span>Dán nội dung Cookie (JSON, Netscape txt, hoặc chuỗi cookie)</span></div>
+      <textarea id="accCookieInp" class="form-control" style="min-height:160px;font-family:var(--font-mono);font-size:12px" placeholder='[{"name": "sessionid", "value": "..."}] hoặc dán định dạng Netscape cookies.txt'></textarea>
+      <div style="font-size:11.5px;color:var(--color-ink-3);margin-top:4px">Hỗ trợ JSON từ Cookie-Editor / EditThisCookie, file cookies.txt, hoặc chuỗi <code>sessionid=...; sessionid_ss=...</code>.</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px">
+      <button class="btn" onclick="hide('dlg')">Hủy</button>
+      <button class="btn btn-p" id="btnSubmitAddAcc" onclick="submitAddAcc()">Lưu Tài Khoản</button>
+    </div>
+  `;
+  show('dlg');
+}
+
+async function submitAddAcc() {
+  const name = q('#accNameInp').value.trim();
+  const raw = q('#accCookieInp').value.trim();
+  if (!name) return toast('Vui lòng nhập tên profile', 'error');
+  if (!raw) return toast('Vui lòng nhập nội dung cookie', 'error');
+
+  let cookieData = raw;
+  try {
+    cookieData = JSON.parse(raw);
+  } catch (e) {
+    cookieData = raw;
+  }
+
+  const btn = q('#btnSubmitAddAcc');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Đang lưu...';
+  }
+
+  try {
+    const res = await api('/api/admin/accounts/import_cookie', {
+      method: 'POST',
+      body: JSON.stringify({ name, data: cookieData })
+    });
+    toast(`Đã lưu tài khoản ${name} thành công (${res.cookie_count || 0} cookies)!`, 'success');
+    hide('dlg');
+    loadAccounts();
+    checkAccountWarning();
+  } catch (e) {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Lưu Tài Khoản';
+    }
+    toast(e.message, 'error');
+  }
+}
+
+let currentLoginMode = 'auto';
+let googleLoginPolling = null;
+let bulkLoginPolling = null;
+let activeBatchData = null;
+
+function openBulkLoginModal() {
+  openLoginAcc('bulk');
+}
+
+function openLoginAcc(targetMode = 'auto') {
+  if (googleLoginPolling) clearInterval(googleLoginPolling);
+  currentLoginMode = targetMode || 'auto';
+
+  const existingRows = document.querySelectorAll('#accountsTable tr td:first-child');
+  const existingNames = Array.from(existingRows).map(el => el.textContent.trim());
+  let nextIdx = 1;
+  while (existingNames.includes(`acc${nextIdx}`)) nextIdx++;
+  const defaultName = `acc${nextIdx}`;
+
+  q('#dlgBox').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <h2 style="margin:0;display:flex;align-items:center;gap:8px" id="loginModalTitle">Đăng Nhập Tài Khoản Google</h2>
+      <button class="btn btn-sm" onclick="closeLoginAccDialog()">✕</button>
+    </div>
+
+    <!-- Mode Selector Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:16px;background:var(--color-paper-3);padding:4px;border-radius:var(--radius-md);border:1px solid var(--color-rule)">
+      <button type="button" class="btn btn-sm btn-p" id="pill_tab_auto" onclick="switchLoginMode('auto')" style="flex:1">⚡ 1 Tài Khoản</button>
+      <button type="button" class="btn btn-sm" id="pill_tab_bulk" onclick="switchLoginMode('bulk')" style="flex:1">📋 Hàng Loạt (Nhiều Nick)</button>
+      <button type="button" class="btn btn-sm" id="pill_tab_manual" onclick="switchLoginMode('manual')" style="flex:1">🌐 Thủ Công (Chrome)</button>
+    </div>
+
+    <div class="form-group" id="loginFormGroup">
+      <div class="form-label"><span>Tên profile lưu tài khoản</span></div>
+      <input id="loginAccNameInp" class="form-control" value="${esc(defaultName)}" placeholder="acc1">
+      <div style="font-size:11.5px;color:var(--color-ink-3);margin-top:4px">Định dạng tên: chỉ gồm chữ cái, số, dấu gạch dưới (VD: acc1, acc2, dola_user).</div>
+    </div>
+
+    <!-- Mode 1: Auto Single Form -->
+    <div id="login_view_auto">
+      <div class="form-group" style="background:var(--color-paper-3);padding:10px 12px;border:1px dashed var(--color-rule);border-radius:var(--radius-md);margin-bottom:14px">
+        <div class="form-label" style="margin-bottom:4px"><span style="font-size:12px;color:var(--color-accent);font-weight:600">📋 Dán nhanh chuỗi (VD: email----pass----2fa hoặc email|pass|2fa):</span></div>
+        <input id="quickPasteInp" class="form-control" style="font-size:12px;font-family:var(--font-mono)" placeholder="user@gmail.com----Password123----JBSWY3DPEHPK3PXP" oninput="handleQuickPaste(this.value)">
+      </div>
+
+      <div class="form-group">
+        <div class="form-label"><span>Email Google</span></div>
+        <input id="autoEmailInp" type="email" class="form-control" placeholder="user@gmail.com">
+      </div>
+
+      <div class="form-group">
+        <div class="form-label"><span>Mật khẩu Google</span></div>
+        <input id="autoPassInp" type="password" class="form-control" placeholder="••••••••">
+      </div>
+
+      <div class="form-group">
+        <div class="form-label"><span>Mã bí mật 2FA (TOTP Secret Key)</span></div>
+        <input id="autoTotpInp" class="form-control" style="font-family:var(--font-mono)" placeholder="JBSWY3DPEHPK3PXP">
+        <div style="font-size:11.5px;color:var(--color-ink-3);margin-top:4px">
+          Khóa bí mật 16-32 ký tự lúc cài Google Authenticator (không phải mã 6 số OTP tạm thời). Hệ thống sẽ tự tính mã OTP theo thời gian thực.
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode 2: Bulk Login Form -->
+    <div id="login_view_bulk" style="display:none">
+      <div id="bulkInputSection">
+        <div style="background:var(--color-paper-3);border:1px dashed var(--color-rule);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--color-ink-2);line-height:1.5">
+          <span style="color:var(--color-accent);font-weight:700">📋 Hướng dẫn định dạng (mỗi dòng 1 nick):</span><br>
+          • <code>user@gmail.com----Password123----TOTP_SECRET</code><br>
+          • <code>acc5----user@gmail.com----Password123----TOTP_SECRET</code><br>
+          • <i>Hỗ trợ dấu phân cách <code>----</code>, <code>|</code>, <code>:::</code> hoặc <code>tab</code>. Hệ thống sẽ tự động tránh trùng tên nick có sẵn.</i>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+          <div class="form-group" style="margin:0">
+            <div class="form-label" style="margin-bottom:2px"><span>Tiền tố profile</span></div>
+            <input id="bulkPrefixInp" class="form-control" value="acc" placeholder="acc" oninput="updateBulkPreview()">
+          </div>
+          <div class="form-group" style="margin:0">
+            <div class="form-label" style="margin-bottom:2px"><span>Số bắt đầu</span></div>
+            <input id="bulkStartNumInp" type="number" min="1" class="form-control" value="${nextIdx}" oninput="updateBulkPreview()">
+          </div>
+          <div class="form-group" style="margin:0">
+            <div class="form-label" style="margin-bottom:2px"><span>Nghỉ giữa các nick</span></div>
+            <select id="bulkDelaySelect" class="form-control">
+              <option value="1">1 giây</option>
+              <option value="2" selected>2 giây</option>
+              <option value="3">3 giây</option>
+              <option value="5">5 giây</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <div class="form-label" style="margin:0"><span>Danh sách tài khoản Google</span></div>
+            <span id="bulkDetectBadge" class="badge">0 tài khoản</span>
+          </div>
+          <textarea id="bulkAccInput" class="form-control" style="min-height:130px;font-family:var(--font-mono);font-size:12px;white-space:pre" placeholder="user1@gmail.com----Pass123----JBSWY3DPEHPK3PXP&#10;user2@gmail.com----Pass456----JBSWY3DPEHPK3PXP&#10;acc8----user3@gmail.com----Pass789----JBSWY3DPEHPK3PXP" oninput="updateBulkPreview()"></textarea>
+        </div>
+
+        <!-- Live Preview Table (collapsible) -->
+        <div id="bulkPreviewArea" style="display:none;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:600;color:var(--color-ink-2);margin-bottom:6px">
+            Xem trước danh sách (<span id="bulkPreviewCount">0</span> nick):
+          </div>
+          <div style="max-height:140px;overflow-y:auto;border:1px solid var(--color-rule);border-radius:var(--radius-md);background:var(--color-paper-2)">
+            <table style="width:100%;font-size:11.5px;border-collapse:collapse;font-family:var(--font-mono)">
+              <thead>
+                <tr style="background:var(--color-paper-3);border-bottom:1px solid var(--color-rule);text-align:left">
+                  <th style="padding:6px 10px;width:34px">#</th>
+                  <th style="padding:6px 10px;width:90px">Profile</th>
+                  <th style="padding:6px 10px">Email</th>
+                  <th style="padding:6px 10px;width:110px">2FA Secret</th>
+                </tr>
+              </thead>
+              <tbody id="bulkPreviewBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Progress & Queue Box (shown when running or completed) -->
+      <div id="bulkProgressBox" style="display:none;margin-top:10px;padding:14px;border-radius:var(--radius-md);background:var(--color-paper-3);border:1px solid var(--color-rule)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span id="bulkSpinner" class="spinner"></span>
+            <span id="bulkProgressTitle" style="font-weight:700;font-size:13.5px;color:var(--color-ink-1)">Đang xử lý hàng loạt...</span>
+          </div>
+          <span id="bulkProgressPct" class="badge b-amber">0%</span>
+        </div>
+
+        <!-- Progress bar -->
+        <div style="width:100%;height:8px;background:var(--color-rule);border-radius:4px;overflow:hidden;margin-bottom:10px">
+          <div id="bulkProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg, var(--color-accent), #38bdf8);transition:width 0.3s ease"></div>
+        </div>
+
+        <!-- Counts row -->
+        <div style="display:flex;gap:14px;font-size:12px;margin-bottom:12px;flex-wrap:wrap">
+          <span style="color:var(--color-success);font-weight:600">✓ Thành công: <b id="bulkCountSuccess">0</b></span>
+          <span style="color:var(--color-danger);font-weight:600">✕ Thất bại: <b id="bulkCountFailed">0</b></span>
+          <span style="color:var(--color-ink-2)">⏳ Đang chạy: <b id="bulkCurrentAccount">—</b></span>
+          <span style="color:var(--color-ink-3)">📋 Tổng số: <b id="bulkCountTotal">0</b></span>
+        </div>
+
+        <!-- Queue status table -->
+        <div style="max-height:220px;overflow-y:auto;border:1px solid var(--color-rule);border-radius:var(--radius-md);background:#ffffff">
+          <table style="width:100%;font-size:11.5px;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--color-paper-3);border-bottom:1px solid var(--color-rule);text-align:left">
+                <th style="padding:6px 10px;width:34px">#</th>
+                <th style="padding:6px 10px;width:80px">Profile</th>
+                <th style="padding:6px 10px">Email</th>
+                <th style="padding:6px 10px;width:110px">Trạng thái</th>
+                <th style="padding:6px 10px">Ghi chú / Lỗi</th>
+              </tr>
+            </thead>
+            <tbody id="bulkQueueBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode 3: Manual Browser Login Form -->
+    <div id="login_view_manual" style="display:none">
+      <p style="color:var(--color-ink-2);font-size:13px;line-height:1.6;margin-bottom:12px">
+        Hệ thống sẽ mở một cửa sổ <b>Google Chrome</b> trực tiếp trên màn hình máy chủ/máy tính của bạn để bạn tự do thao tác đăng nhập Google vào <b>Dola</b>. Dành cho tài khoản cá nhân, xác minh qua số điện thoại hoặc app xác thực.
+      </p>
+    </div>
+
+    <!-- Status box for single account mode -->
+    <div id="loginStatusBox" style="display:none;margin-top:14px;padding:14px;border-radius:var(--radius-md);background:var(--color-paper-3);border:1px solid var(--color-rule)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span id="loginSpinner" class="spinner"></span>
+        <span id="loginStatusTitle" style="font-weight:700;font-size:13.5px;color:var(--color-ink-1)">Đang chuẩn bị...</span>
+      </div>
+      <div id="loginStatusDesc" style="font-size:12.5px;color:var(--color-ink-2);line-height:1.5"></div>
+      <div id="loginTimerText" style="font-size:11px;font-family:var(--font-mono);color:var(--color-ink-3);margin-top:8px"></div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px">
+      <div>
+        <button class="btn btn-sm btn-danger" id="btnBulkCancel" style="display:none" onclick="cancelBulkLogin()">🛑 Dừng Hàng Đợi</button>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn" id="btnLoginCancel" onclick="closeLoginAccDialog()">Đóng</button>
+        <button class="btn btn-p" id="btnLoginStart" onclick="submitActiveLogin()">⚡ Bắt Đầu Tự Động Đăng Nhập</button>
+      </div>
+    </div>
+  `;
+
+  show('dlg');
+  switchLoginMode(currentLoginMode);
+}
+
+function closeLoginAccDialog() {
+  if (googleLoginPolling) {
+    clearInterval(googleLoginPolling);
+    googleLoginPolling = null;
+  }
+  const box = q('#dlgBox');
+  if (box) {
+    box.style.width = '';
+    box.style.maxWidth = '';
+  }
+  hide('dlg');
+}
+
+function switchLoginMode(mode) {
+  currentLoginMode = mode;
+  const isAuto = mode === 'auto';
+  const isBulk = mode === 'bulk';
+  const isManual = mode === 'manual';
+
+  const btnAuto = q('#pill_tab_auto');
+  const btnBulk = q('#pill_tab_bulk');
+  const btnManual = q('#pill_tab_manual');
+  const viewAuto = q('#login_view_auto');
+  const viewBulk = q('#login_view_bulk');
+  const viewManual = q('#login_view_manual');
+  const loginFormGroup = q('#loginFormGroup');
+  const btnSubmit = q('#btnLoginStart');
+  const btnCancel = q('#btnLoginCancel');
+  const btnBulkCancel = q('#btnBulkCancel');
+  const box = q('#dlgBox');
+
+  if (btnAuto) btnAuto.className = isAuto ? 'btn btn-sm btn-p' : 'btn btn-sm';
+  if (btnBulk) btnBulk.className = isBulk ? 'btn btn-sm btn-p' : 'btn btn-sm';
+  if (btnManual) btnManual.className = isManual ? 'btn btn-sm btn-p' : 'btn btn-sm';
+
+  if (viewAuto) viewAuto.style.display = isAuto ? 'block' : 'none';
+  if (viewBulk) viewBulk.style.display = isBulk ? 'block' : 'none';
+  if (viewManual) viewManual.style.display = isManual ? 'block' : 'none';
+  if (loginFormGroup) loginFormGroup.style.display = isBulk ? 'none' : 'block';
+
+  if (box) {
+    if (isBulk) {
+      box.style.width = '740px';
+      box.style.maxWidth = '95vw';
+    } else {
+      box.style.width = '';
+      box.style.maxWidth = '';
+    }
+  }
+
+  if (isBulk) {
+    if (activeBatchData && activeBatchData.status === 'running') {
+      if (btnSubmit) btnSubmit.style.display = 'none';
+      if (btnBulkCancel) btnBulkCancel.style.display = 'inline-block';
+      if (btnCancel) btnCancel.textContent = 'Ẩn Cửa Sổ (Chạy Ngầm)';
+      renderBulkProgress(activeBatchData);
+    } else {
+      if (btnSubmit) {
+        btnSubmit.style.display = 'inline-block';
+        btnSubmit.textContent = '🚀 Bắt Đầu Đăng Nhập Hàng Loạt';
+      }
+      if (btnBulkCancel) btnBulkCancel.style.display = 'none';
+      if (btnCancel) btnCancel.textContent = 'Đóng';
+      updateBulkPreview();
+    }
+  } else if (isAuto) {
+    if (btnSubmit) {
+      btnSubmit.style.display = 'inline-block';
+      btnSubmit.textContent = '⚡ Bắt Đầu Tự Động Đăng Nhập';
+    }
+    if (btnBulkCancel) btnBulkCancel.style.display = 'none';
+    if (btnCancel) btnCancel.textContent = 'Đóng';
+  } else {
+    if (btnSubmit) {
+      btnSubmit.style.display = 'inline-block';
+      btnSubmit.textContent = '🌐 Mở Cửa Sổ Trình Duyệt';
+    }
+    if (btnBulkCancel) btnBulkCancel.style.display = 'none';
+    if (btnCancel) btnCancel.textContent = 'Đóng';
+  }
+}
+
+function handleQuickPaste(val) {
+  val = (val || '').trim();
+  if (!val) return;
+  let parts = [];
+  if (val.includes('----')) parts = val.split('----');
+  else if (val.includes('|')) parts = val.split('|');
+  else if (val.includes('\t')) parts = val.split('\t');
+  else if (val.includes(':::')) parts = val.split(':::');
+  else if (val.includes(':') && val.split(':').length === 3) parts = val.split(':');
+
+  if (parts.length >= 2) {
+    if (q('#autoEmailInp')) q('#autoEmailInp').value = parts[0].trim();
+    if (q('#autoPassInp')) q('#autoPassInp').value = parts[1].trim();
+    if (parts.length >= 3 && q('#autoTotpInp')) q('#autoTotpInp').value = parts[2].trim();
+    toast('Đã trích xuất Email, Mật khẩu và Mã 2FA!', 'success');
+  }
+}
+
+function parseBulkInputClient(text, prefix = 'acc', startNum = 1) {
+  const existingRows = document.querySelectorAll('#accountsTable tr td:first-child');
+  const usedNames = new Set(Array.from(existingRows).map(el => el.textContent.trim()));
+  const cleanPrefix = (prefix || 'acc').replace(/[^A-Za-z0-9_-]/g, '') || 'acc';
+  let counter = Math.max(1, parseInt(startNum) || 1);
+
+  function getNextName() {
+    while (usedNames.has(`${cleanPrefix}${counter}`)) counter++;
+    const n = `${cleanPrefix}${counter}`;
+    usedNames.add(n);
+    counter++;
+    return n;
+  }
+
+  const lines = (text || '').split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('#') && !l.startsWith('//'));
+  const items = [];
+
+  for (const line of lines) {
+    let parts = [];
+    if (line.includes('----')) parts = line.split('----');
+    else if (line.includes('|')) parts = line.split('|');
+    else if (line.includes('\t')) parts = line.split('\t');
+    else if (line.includes(':::')) parts = line.split(':::');
+    else if (line.includes(':') && line.split(':').length >= 3) parts = line.split(':');
+    else parts = line.split(/\s+/).filter(Boolean);
+
+    parts = parts.map(p => p.trim());
+    if (!parts.length) continue;
+
+    let name = '', email = '', pass = '', totp = '';
+    if (parts[0].includes('@')) {
+      email = parts[0];
+      pass = parts[1] || '';
+      totp = parts[2] || '';
+      name = getNextName();
+    } else if (parts.length > 1 && parts[1].includes('@')) {
+      name = parts[0].replace(/[^A-Za-z0-9_-]/g, '').slice(0, 32);
+      if (!name || usedNames.has(name)) name = getNextName();
+      else usedNames.add(name);
+      email = parts[1];
+      pass = parts[2] || '';
+      totp = parts[3] || '';
+    } else {
+      if (parts.length >= 2) {
+        email = parts[0];
+        pass = parts[1];
+        totp = parts[2] || '';
+        name = getNextName();
+      }
+    }
+    if (email && pass) {
+      items.push({ name, email, pass, totp });
+    }
+  }
+  return items;
+}
+
+function updateBulkPreview() {
+  const inp = q('#bulkAccInput');
+  const raw = inp ? inp.value : '';
+  const prefix = q('#bulkPrefixInp') ? q('#bulkPrefixInp').value : 'acc';
+  const startNum = q('#bulkStartNumInp') ? q('#bulkStartNumInp').value : 1;
+  const items = parseBulkInputClient(raw, prefix, startNum);
+
+  const badge = q('#bulkDetectBadge');
+  const area = q('#bulkPreviewArea');
+  const countSpan = q('#bulkPreviewCount');
+  const tbody = q('#bulkPreviewBody');
+  const btnSubmit = q('#btnLoginStart');
+
+  if (badge) {
+    badge.textContent = `${items.length} tài khoản`;
+    badge.className = items.length > 0 ? 'badge b-green' : 'badge';
+  }
+
+  if (items.length > 0) {
+    if (area) area.style.display = 'block';
+    if (countSpan) countSpan.textContent = items.length;
+    if (tbody) {
+      tbody.innerHTML = items.map((it, idx) => `
+        <tr style="border-bottom:1px solid var(--color-rule)">
+          <td style="padding:5px 10px;color:var(--color-ink-3)">${idx + 1}</td>
+          <td style="padding:5px 10px;font-weight:600;color:var(--color-ink-1)"><code>${esc(it.name)}</code></td>
+          <td style="padding:5px 10px;color:var(--color-ink-1)">${esc(it.email)}</td>
+          <td style="padding:5px 10px">${it.totp ? `<span class="badge b-green" style="font-size:10px">✓ 2FA OK</span>` : `<span class="badge" style="font-size:10px">Không có 2FA</span>`}</td>
+        </tr>
+      `).join('');
+    }
+    if (btnSubmit && currentLoginMode === 'bulk') {
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = `🚀 Bắt Đầu Đăng Nhập Hàng Loạt (${items.length} nick)`;
+    }
+  } else {
+    if (area) area.style.display = 'none';
+    if (btnSubmit && currentLoginMode === 'bulk') {
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = '🚀 Bắt Đầu Đăng Nhập Hàng Loạt';
+    }
+  }
+}
+
+function submitActiveLogin() {
+  if (currentLoginMode === 'bulk') {
+    if (activeBatchData && activeBatchData.status === 'completed') {
+      activeBatchData = null;
+      const secInput = q('#bulkInputSection');
+      const boxProg = q('#bulkProgressBox');
+      if (secInput) secInput.style.display = 'block';
+      if (boxProg) boxProg.style.display = 'none';
+      switchLoginMode('bulk');
+      return;
+    }
+    submitBulkLogin();
+  } else {
+    submitGoogleLogin();
+  }
+}
+
+async function submitGoogleLogin() {
+  const nameInp = q('#loginAccNameInp');
+  const name = nameInp ? nameInp.value.trim() : '';
+  if (!name) return toast('Vui lòng nhập tên tài khoản profile', 'error');
+
+  const btnStart = q('#btnLoginStart');
+  const btnCancel = q('#btnLoginCancel');
+  const statusBox = q('#loginStatusBox');
+  const statusTitle = q('#loginStatusTitle');
+  const statusDesc = q('#loginStatusDesc');
+  const spinner = q('#loginSpinner');
+  const timerText = q('#loginTimerText');
+
+  if (currentLoginMode === 'auto') {
+    const email = q('#autoEmailInp') ? q('#autoEmailInp').value.trim() : '';
+    const password = q('#autoPassInp') ? q('#autoPassInp').value.trim() : '';
+    const totp = q('#autoTotpInp') ? q('#autoTotpInp').value.trim() : '';
+
+    if (!email) return toast('Vui lòng nhập Email Google', 'error');
+    if (!password) return toast('Vui lòng nhập Mật khẩu', 'error');
+    if (!totp) return toast('Vui lòng nhập mã bí mật 2FA (TOTP Secret Key)', 'error');
+
+    btnStart.disabled = true;
+    if (nameInp) nameInp.disabled = true;
+    statusBox.style.display = 'block';
+    statusBox.style.background = 'var(--color-paper-3)';
+    statusBox.style.borderColor = 'var(--color-rule)';
+    spinner.style.display = 'inline-block';
+    statusTitle.textContent = 'Đang tự động đăng nhập Google...';
+    statusTitle.style.color = 'var(--color-ink-1)';
+    statusDesc.innerHTML = 'Đang mở Chromium và tự động điền Email, Mật khẩu, tính mã 2FA... Trình duyệt sẽ tự hoàn tất và tự đóng.';
+
+    try {
+      await api('/api/admin/accounts', {
+        method: 'POST',
+        body: JSON.stringify({ name, email, password, totp })
+      });
+      toast('Đã kích hoạt tiến trình tự động đăng nhập!', 'info');
+      startPollingLoginStatus(name);
+    } catch (err) {
+      btnStart.disabled = false;
+      if (nameInp) nameInp.disabled = false;
+      spinner.style.display = 'none';
+      statusBox.style.background = 'var(--color-danger-subtle)';
+      statusBox.style.borderColor = 'var(--color-danger-border)';
+      statusTitle.textContent = 'Không thể bắt đầu đăng nhập';
+      statusTitle.style.color = 'var(--color-danger)';
+      statusDesc.innerHTML = `Lỗi: ${esc(err.message)}`;
+      toast(err.message, 'error');
+    }
+  } else {
+    btnStart.disabled = true;
+    if (nameInp) nameInp.disabled = true;
+    statusBox.style.display = 'block';
+    statusBox.style.background = 'var(--color-paper-3)';
+    statusBox.style.borderColor = 'var(--color-rule)';
+    spinner.style.display = 'inline-block';
+    statusTitle.textContent = 'Đang khởi chạy Chrome...';
+    statusTitle.style.color = 'var(--color-ink-1)';
+    statusDesc.innerHTML = 'Đang mở profile <code>accounts/' + esc(name) + '</code> và khởi động Chrome ở chế độ hiển thị (headful)...';
+
+    try {
+      await api('/api/admin/accounts/login-browser', {
+        method: 'POST',
+        body: JSON.stringify({ name })
+      });
+      toast('Đã khởi chạy cửa sổ Chrome!', 'info');
+      statusTitle.textContent = 'Cửa sổ Chrome đã mở — Vui lòng đăng nhập Google';
+      statusDesc.innerHTML = '👉 Chuyển sang cửa sổ Chrome vừa xuất hiện trên màn hình và hoàn tất đăng nhập Google trên Dola.<br>⏳ Hệ thống đang tự động lắng nghe session đăng nhập...';
+      startPollingLoginStatus(name);
+    } catch (err) {
+      btnStart.disabled = false;
+      if (nameInp) nameInp.disabled = false;
+      spinner.style.display = 'none';
+      statusBox.style.background = 'var(--color-danger-subtle)';
+      statusBox.style.borderColor = 'var(--color-danger-border)';
+      statusTitle.textContent = 'Không thể mở trình duyệt';
+      statusTitle.style.color = 'var(--color-danger)';
+      statusDesc.innerHTML = `Lỗi: ${esc(err.message)}`;
+      toast(err.message, 'error');
+    }
+  }
+}
+
+function startPollingLoginStatus(name) {
+  const btnStart = q('#btnLoginStart');
+  const btnCancel = q('#btnLoginCancel');
+  const statusBox = q('#loginStatusBox');
+  const statusTitle = q('#loginStatusTitle');
+  const statusDesc = q('#loginStatusDesc');
+  const spinner = q('#loginSpinner');
+  const timerText = q('#loginTimerText');
+  const nameInp = q('#loginAccNameInp');
+
+  let elapsed = 0;
+  if (googleLoginPolling) clearInterval(googleLoginPolling);
+  googleLoginPolling = setInterval(async () => {
+    elapsed += 2;
+    if (timerText) timerText.textContent = `Thời gian theo dõi: ${elapsed}s (Tối đa 10 phút)`;
+
+    try {
+      const check = await api(`/api/admin/accounts/login-browser/status?name=${encodeURIComponent(name)}`);
+      if (check.status === 'success') {
+        clearInterval(googleLoginPolling);
+        googleLoginPolling = null;
+        if (spinner) spinner.style.display = 'none';
+        if (statusBox) {
+          statusBox.style.background = 'var(--color-success-subtle)';
+          statusBox.style.borderColor = 'var(--color-success-border)';
+        }
+        if (statusTitle) {
+          statusTitle.textContent = '✓ Đăng Nhập Google Thành Công!';
+          statusTitle.style.color = 'var(--color-success)';
+        }
+        if (statusDesc) {
+          statusDesc.innerHTML = `Tài khoản <b>${esc(name)}</b> đã được xác thực và kích hoạt thành công vào Account Pool. Bạn đã có thể tạo video ngay!`;
+        }
+        if (btnStart) btnStart.style.display = 'none';
+        if (btnCancel) btnCancel.textContent = 'Hoàn tất & Đóng';
+        toast(`Tài khoản ${name} đã đăng nhập thành công!`, 'success');
+        loadAccounts();
+        checkAccountWarning();
+      } else if (check.status === 'failed') {
+        clearInterval(googleLoginPolling);
+        googleLoginPolling = null;
+        if (spinner) spinner.style.display = 'none';
+        if (statusBox) {
+          statusBox.style.background = 'var(--color-danger-subtle)';
+          statusBox.style.borderColor = 'var(--color-danger-border)';
+        }
+        if (statusTitle) {
+          statusTitle.textContent = 'Đăng nhập không thành công';
+          statusTitle.style.color = 'var(--color-danger)';
+        }
+        if (statusDesc) {
+          statusDesc.innerHTML = `Lỗi: ${esc(check.error || 'Trình duyệt bị đóng hoặc quá thời gian đăng nhập.')}`;
+        }
+        if (btnStart) btnStart.disabled = false;
+        if (nameInp) nameInp.disabled = false;
+        if (btnCancel) btnCancel.textContent = 'Đóng';
+      } else if (check.message && statusDesc) {
+        statusDesc.innerHTML = esc(check.message);
+      }
+    } catch (err) {
+      console.warn('Poll login status error:', err);
+    }
+  }, 2000);
+}
+
+async function submitBulkLogin() {
+  const inp = q('#bulkAccInput');
+  const raw = inp ? inp.value.trim() : '';
+  const prefix = q('#bulkPrefixInp') ? q('#bulkPrefixInp').value.trim() : 'acc';
+  const startNum = q('#bulkStartNumInp') ? parseInt(q('#bulkStartNumInp').value) || 1 : 1;
+  const delaySec = q('#bulkDelaySelect') ? parseInt(q('#bulkDelaySelect').value) || 2 : 2;
+
+  const clientItems = parseBulkInputClient(raw, prefix, startNum);
+  if (!clientItems.length) {
+    return toast('Không tìm thấy tài khoản hợp lệ nào. Vui lòng kiểm tra định dạng dán vào.', 'error');
+  }
+
+  const btnSubmit = q('#btnLoginStart');
+  const btnCancel = q('#btnLoginCancel');
+  const btnBulkCancel = q('#btnBulkCancel');
+  const secInput = q('#bulkInputSection');
+  const boxProg = q('#bulkProgressBox');
+
+  if (btnSubmit) {
+    btnSubmit.disabled = true;
+    btnSubmit.style.display = 'none';
+  }
+  if (btnBulkCancel) btnBulkCancel.style.display = 'inline-block';
+  if (btnCancel) btnCancel.textContent = 'Ẩn Cửa Sổ (Chạy Ngầm)';
+
+  if (secInput) secInput.style.display = 'none';
+  if (boxProg) boxProg.style.display = 'block';
+
+  try {
+    const res = await api('/api/admin/accounts/bulk-login', {
+      method: 'POST',
+      body: JSON.stringify({
+        raw_text: raw,
+        prefix: prefix,
+        start_num: startNum,
+        delay_seconds: delaySec
+      })
+    });
+    toast(`Đã kích hoạt hàng đợi đăng nhập cho ${res.batch.total} tài khoản!`, 'info');
+    activeBatchData = res.batch;
+    renderBulkProgress(res.batch);
+    startBulkPolling();
+  } catch (err) {
+    toast(`Lỗi: ${err.message}`, 'error');
+    if (secInput) secInput.style.display = 'block';
+    if (boxProg) boxProg.style.display = 'none';
+    if (btnSubmit) {
+      btnSubmit.disabled = false;
+      btnSubmit.style.display = 'inline-block';
+    }
+    if (btnBulkCancel) btnBulkCancel.style.display = 'none';
+    if (btnCancel) btnCancel.textContent = 'Đóng';
+  }
+}
+
+function renderBulkProgress(batch) {
+  if (!batch) return;
+  activeBatchData = batch;
+
+  const total = batch.total || 1;
+  const completed = (batch.success_count || 0) + (batch.failed_count || 0);
+  const pct = Math.round((completed / total) * 100);
+
+  const bar = q('#bulkProgressBar');
+  const pctBadge = q('#bulkProgressPct');
+  const title = q('#bulkProgressTitle');
+  const spinner = q('#bulkSpinner');
+  const countSuccess = q('#bulkCountSuccess');
+  const countFailed = q('#bulkCountFailed');
+  const currAcc = q('#bulkCurrentAccount');
+  const countTotal = q('#bulkCountTotal');
+  const tbody = q('#bulkQueueBody');
+  const btnSubmit = q('#btnLoginStart');
+  const btnCancel = q('#btnLoginCancel');
+  const btnBulkCancel = q('#btnBulkCancel');
+
+  if (bar) bar.style.width = `${pct}%`;
+  if (pctBadge) pctBadge.textContent = `${pct}%`;
+  if (countSuccess) countSuccess.textContent = batch.success_count || 0;
+  if (countFailed) countFailed.textContent = batch.failed_count || 0;
+  if (currAcc) currAcc.textContent = batch.current_account || '—';
+  if (countTotal) countTotal.textContent = total;
+
+  if (batch.status === 'running') {
+    if (title) title.textContent = `Đang xử lý: ${batch.current_account || '...'} (${completed + 1}/${total})`;
+    if (spinner) spinner.style.display = 'inline-block';
+    if (btnBulkCancel) btnBulkCancel.style.display = 'inline-block';
+    if (btnSubmit) btnSubmit.style.display = 'none';
+    if (btnCancel) btnCancel.textContent = 'Ẩn Cửa Sổ (Chạy Ngầm)';
+  } else if (batch.status === 'completed') {
+    if (title) {
+      title.textContent = `✓ Đã hoàn tất: ${batch.success_count}/${total} tài khoản thành công`;
+      title.style.color = 'var(--color-success)';
+    }
+    if (spinner) spinner.style.display = 'none';
+    if (bar) bar.style.background = 'var(--color-success)';
+    if (btnBulkCancel) btnBulkCancel.style.display = 'none';
+    if (btnSubmit) {
+      btnSubmit.style.display = 'inline-block';
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = '🔄 Đăng Nhập Đợt Mới';
+    }
+    if (btnCancel) btnCancel.textContent = 'Đóng';
+  } else if (batch.status === 'cancelled') {
+    if (title) {
+      title.textContent = `Đã dừng hàng đợi (${batch.success_count} thành công, ${batch.failed_count} thất bại)`;
+      title.style.color = 'var(--color-ink-2)';
+    }
+    if (spinner) spinner.style.display = 'none';
+    if (btnBulkCancel) btnBulkCancel.style.display = 'none';
+    if (btnSubmit) {
+      btnSubmit.style.display = 'inline-block';
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = '🔄 Đăng Nhập Đợt Mới';
+    }
+    if (btnCancel) btnCancel.textContent = 'Đóng';
+  }
+
+  if (tbody && batch.items) {
+    tbody.innerHTML = batch.items.map((it, idx) => {
+      let stBadge = '<span class="badge">Chờ</span>';
+      if (it.status === 'running') stBadge = '<span class="badge b-amber"><span class="spinner" style="width:10px;height:10px;border-width:1.5px;margin-right:4px"></span>Đang xử lý</span>';
+      if (it.status === 'success') stBadge = '<span class="badge b-green">✓ Thành công</span>';
+      if (it.status === 'failed') stBadge = '<span class="badge b-red">✕ Thất bại</span>';
+      if (it.status === 'cancelled') stBadge = '<span class="badge">Đã hủy</span>';
+
+      let detail = it.message || '';
+      if (it.error) {
+        detail = `<span style="color:var(--color-danger)">${esc(it.error)}</span>`;
+      }
+
+      return `
+        <tr style="border-bottom:1px solid var(--color-rule)">
+          <td style="padding:6px 10px;color:var(--color-ink-3)">${idx + 1}</td>
+          <td style="padding:6px 10px;font-weight:600"><code>${esc(it.name)}</code></td>
+          <td style="padding:6px 10px">${esc(it.email)}</td>
+          <td style="padding:6px 10px">${stBadge}</td>
+          <td style="padding:6px 10px;font-size:11px;color:var(--color-ink-2)">${detail}</td>
+        </tr>
+      `;
+    }).join('');
+  }
+}
+
+function startBulkPolling() {
+  if (bulkLoginPolling) clearInterval(bulkLoginPolling);
+
+  const banner = q('#bulkActiveBanner');
+  const bannerTitle = q('#bulkActiveBannerTitle');
+  const bannerSub = q('#bulkActiveBannerSub');
+
+  let prevSuccess = (activeBatchData && activeBatchData.success_count) || 0;
+
+  bulkLoginPolling = setInterval(async () => {
+    try {
+      const res = await api('/api/admin/accounts/bulk-login/status');
+      if (!res.ok || !res.batch || res.batch.status === 'none') {
+        clearInterval(bulkLoginPolling);
+        bulkLoginPolling = null;
+        if (banner) banner.style.display = 'none';
+        return;
+      }
+
+      const batch = res.batch;
+      activeBatchData = batch;
+
+      if (batch.status === 'running') {
+        if (banner) {
+          banner.style.display = 'flex';
+          if (bannerTitle) bannerTitle.textContent = `⚡ Đang đăng nhập hàng loạt: ${batch.completed_count}/${batch.total} (Đang chạy: ${batch.current_account || '...'})`;
+          if (bannerSub) bannerSub.textContent = `Đã thành công ${batch.success_count} nick, thất bại ${batch.failed_count} nick. Bấm để xem chi tiết.`;
+        }
+      } else {
+        if (banner) banner.style.display = 'none';
+      }
+
+      // If in bulk modal, render progress live
+      if (currentLoginMode === 'bulk' && q('#dlg') && q('#dlg').style.display !== 'none') {
+        const secInput = q('#bulkInputSection');
+        const boxProg = q('#bulkProgressBox');
+        if (secInput) secInput.style.display = 'none';
+        if (boxProg) boxProg.style.display = 'block';
+        renderBulkProgress(batch);
+      }
+
+      // If a new account completed successfully, refresh accounts table in background
+      if (batch.success_count > prevSuccess) {
+        prevSuccess = batch.success_count;
+        loadAccounts();
+        checkAccountWarning();
+      }
+
+      // Check termination
+      if (batch.status === 'completed' || batch.status === 'cancelled') {
+        clearInterval(bulkLoginPolling);
+        bulkLoginPolling = null;
+        if (batch.status === 'completed') {
+          toast(`✓ Hoàn tất đăng nhập hàng loạt: ${batch.success_count}/${batch.total} tài khoản thành công!`, 'success');
+        } else {
+          toast(`Đã dừng tiến trình đăng nhập hàng loạt (${batch.success_count} thành công, ${batch.failed_count} thất bại).`, 'info');
+        }
+        loadAccounts();
+        checkAccountWarning();
+      }
+    } catch (e) {
+      console.warn('Bulk poll error:', e);
+    }
+  }, 2000);
+}
+
+async function cancelBulkLogin() {
+  const btn = q('#btnBulkCancel');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Đang dừng...';
+  }
+  try {
+    await api('/api/admin/accounts/bulk-login/cancel', { method: 'POST' });
+    toast('Đã gửi lệnh dừng tiến trình hàng loạt', 'info');
+  } catch (e) {
+    toast(`Lỗi: ${e.message}`, 'error');
+  }
+}
+
+async function checkBulkStatusOnPageLoad() {
+  try {
+    const res = await api('/api/admin/accounts/bulk-login/status');
+    if (res && res.batch && res.batch.status === 'running') {
+      activeBatchData = res.batch;
+      startBulkPolling();
+    }
+  } catch (e) {}
+}
+
+/* Tasks Tab */
+async function loadTasks() {
+  try {
+    const res = await api('/api/admin/tasks');
+    const list = Array.isArray(res) ? res : (res && res.tasks ? res.tasks : []);
+    const rows = list.map(t => {
+      let stBadge = '<span class="badge">Queued</span>';
+      if (t.status === 'processing') stBadge = '<span class="badge b-amber">Đang render</span>';
+      if (t.status === 'completed') stBadge = '<span class="badge b-green">Hoàn tất</span>';
+      if (t.status === 'failed') stBadge = '<span class="badge b-red">Thất bại</span>';
+
+      let videoCell = '—';
+      if (t.video_url) {
+        videoCell = `<div style="display:flex;gap:6px">
+          <a class="btn btn-sm btn-p" href="${esc(t.video_url)}" target="_blank" download>Tải</a>
+          <button class="btn btn-sm" onclick="playVideo('${esc(t.video_url)}')">Xem</button>
+        </div>`;
+      }
+      return [
+        `<code style="font-family:var(--font-mono);font-size:11.5px">${esc(t.id)}</code>`,
+        `<div style="max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(t.prompt)}">${esc(t.prompt)}</div>`,
+        `<span class="badge">${esc(t.model)}</span>`,
+        stBadge,
+        videoCell,
+        `<span style="font-family:var(--font-mono);font-size:12px">${fmt(t.created_at)}</span>`
+      ];
+    });
+    q('#tasksTable').innerHTML = table(['Task ID', 'Prompt', 'Model', 'Trạng thái', 'Video', 'Thời gian'], rows);
+  } catch (e) {
+    q('#tasksTable').innerHTML = `<div style="padding:24px;text-align:center;color:var(--color-ink-3)">${esc(e.message)}</div>`;
+  }
+}
+
+/* API Keys Tab */
+async function loadKeys() {
+  try {
+    const res = await api('/api/admin/keys');
+    const list = Array.isArray(res) ? res : (res && res.keys ? res.keys : []);
+    const rows = list.map(k => [
+      `<span style="font-weight:600">${esc(k.name || 'Không tên')}</span>`,
+      `<code style="font-family:var(--font-mono);font-size:12px">${esc(k.key)}</code>`,
+      k.enabled ? '<span class="badge b-green">Kích hoạt</span>' : '<span class="badge b-red">Tạm tắt</span>',
+      `<span style="font-family:var(--font-mono)">${k.usage_today || 0} / ${k.daily_limit || '∞'}</span>`,
+      `<div style="display:flex;gap:6px">
+        <button class="btn btn-sm" onclick="copy('${esc(k.key)}');toast('Đã copy API Key!','success')">Copy</button>
+        <button class="btn btn-sm" onclick="delKey('${esc(k.key)}')">Xóa</button>
+      </div>`
+    ]);
+    q('#keysTable').innerHTML = table(['Tên Client', 'API Key (Bearer)', 'Trạng thái', 'Hôm nay', 'Thao tác'], rows);
+  } catch (e) {
+    q('#keysTable').innerHTML = `<div style="padding:24px;text-align:center;color:var(--color-ink-3)">${esc(e.message)}</div>`;
+  }
+}
+
+function openCreateKey() {
+  q('#dlgBox').innerHTML = `
+    <h2>Tạo API Key Mới</h2>
+    <div class="form-group">
+      <div class="form-label"><span>Tên ghi nhớ client</span></div>
+      <input id="keyNameInp" class="form-control" placeholder="my_nextjs_app">
+    </div>
+    <div class="form-group">
+      <div class="form-label"><span>Giới hạn số video mỗi ngày (0 = không giới hạn)</span></div>
+      <input id="keyLimitInp" type="number" class="form-control" value="50">
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
+      <button class="btn" onclick="hide('dlg')">Hủy</button>
+      <button class="btn btn-p" onclick="submitCreateKey()">Khởi Tạo Key</button>
+    </div>
+  `;
+  show('dlg');
+}
+
+async function submitCreateKey() {
+  const name = q('#keyNameInp').value.trim();
+  const limit = parseInt(q('#keyLimitInp').value) || 0;
+  try {
+    const res = await api('/api/admin/keys', {
+      method: 'POST',
+      body: JSON.stringify({ name, daily_limit: limit })
+    });
+    hide('dlg');
+    toast(`Đã tạo key mới: ${res.key}`, 'success');
+    loadKeys();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+async function delKey(key) {
+  if (!confirm('Xóa API Key này? Các client dùng key sẽ không thể tạo video nữa.')) return;
+  try {
+    await api(`/api/admin/keys/${key}`, { method: 'DELETE' });
+    toast('Đã xóa API Key thành công!', 'success');
+    loadKeys();
+  } catch (e) {
+    toast(e.message, 'error');
+  }
+}
+
+/* Table Helper */
+function table(headers, rows) {
+  if (!rows || rows.length === 0) {
+    return '<div style="padding:24px;text-align:center;color:var(--color-ink-3)">Không có bản ghi nào để hiển thị.</div>';
+  }
+  return `
+    <table>
+      <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+      <tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table>
+  `;
+}
+
+function playVideo(url) {
+  const v = q('#videoEl');
+  v.src = url;
+  show('videoModal');
+}
+function closeVideo() {
+  const v = q('#videoEl');
+  v.pause();
+  v.src = '';
+  hide('videoModal');
+}
+
+/* Modals */
+function openDonateModal() { show('donateModal'); }
+function closeDonateModal() { hide('donateModal'); }
+const NET_PRESETS = {
+  auto: { timezone: '', region: '', geolocation: '' },
+  jp: { timezone: 'Asia/Tokyo', region: 'JP', geolocation: '35.6762,139.6503' },
+  kr: { locale: '', timezone: 'Asia/Seoul', region: 'KR', geolocation: '37.5665,126.9780' },
+  clash: { proxy: 'http://127.0.0.1:7890' },
+  direct: { proxy: '', proxy_username: '' },
+};
+const NET_FIELDS = { proxy: '#netProxy', proxy_username: '#netProxyUser', proxy_bypass: '#netProxyBypass',
+  locale: '#netLocale', timezone: '#netTimezone', region: '#netRegion', geolocation: '#netGeo' };
+const NET_EFF = { locale: '#netEffLocale', timezone: '#netEffTimezone', region: '#netEffRegion', geolocation: '#netEffGeo' };
+const NET_SRC_LABEL = { auto: 'tự động theo proxy', manual: 'nhập tay', default: 'mặc định' };
+
+function renderNetworkStatus(s) {
+  const d = s.detected || {};
+  const st = q('#netDetectStatus');
+  const at = d.at ? new Date(d.at * 1000).toLocaleTimeString() : '';
+  if (!d.at) st.innerHTML = 'Chưa nhận diện vị trí proxy.';
+  else if (d.error) st.innerHTML = `⚠️ Không nhận diện được vị trí (${esc(d.via || '')}): ${esc(d.error)}<br>Ô để trống đang dùng mặc định Nhật.`;
+  else st.innerHTML = `📍 IP proxy <b>${esc(d.ip)}</b> · ${esc(d.country)} ${esc(d.city)} · ${esc(d.timezone)} · ${esc(d.loc)}` +
+    `<br><span style="opacity:.75">qua ${esc(d.via)} · ${esc(d.org)} · lúc ${esc(at)}</span>` +
+    (['JP', 'KR'].includes(d.country) ? '' : '<br><span style="color:#92400e">⚠️ IP này không thuộc Nhật / Hàn, Dola có thể từ chối.</span>');
+  const eff = s.effective || {}, src = s.sources || {};
+  for (const [k, sel] of Object.entries(NET_EFF)) {
+    const val = k === 'geolocation' && eff[k] === 'off' ? 'không gửi' : (eff[k] || '-');
+    const kind = src[k] || 'default';
+    q(sel).innerHTML = `Đang gửi: <b>${esc(val)}</b><span class="net-src ${kind}">${NET_SRC_LABEL[kind]}</span>`;
+  }
+}
+
+function fillNetworkForm(s) {
+  const localeSel = q('#netLocale');
+  if (s.locale && ![...localeSel.options].some(o => o.value === s.locale)) {
+    localeSel.add(new Option(`${s.locale} (từ .env.local)`, s.locale));  // keep a custom value visible
+  }
+  for (const [k, sel] of Object.entries(NET_FIELDS)) { const el = q(sel); if (el) el.value = s[k] || ''; }
+  const pass = q('#netProxyPass');
+  pass.value = '';
+  pass.placeholder = s.proxy_password_set ? '•••••• (đã lưu, để trống = giữ nguyên)' : '';
+  q('#netProxyPassClear').checked = false;
+  q('#netProxyPassClear').parentElement.style.display = s.proxy_password_set ? 'flex' : 'none';
+  const warn = q('#netEnvOverrideWarn');
+  const ov = s.env_overrides || [];
+  warn.style.display = ov.length ? 'block' : 'none';
+  warn.innerHTML = ov.length ? `⚠️ Biến môi trường hệ thống đang đặt <code>${ov.map(esc).join(', ')}</code>. Lưu ở đây có hiệu lực ngay, nhưng sau khi khởi động lại server giá trị từ biến môi trường sẽ được dùng lại.` : '';
+  renderNetworkStatus(s);
+}
+
+async function openProxyModal() {
+  q('#netTestResult').style.display = 'none';
+  show('proxyModal');
+  try { fillNetworkForm(await api('/api/admin/settings/network')); }
+  catch (e) { toast('Không tải được cấu hình: ' + e.message, 'error'); }
+}
+function closeProxyModal() { hide('proxyModal'); }
+const promptProxyHelp = openProxyModal;
+
+function applyNetPreset(name) {
+  for (const [k, v] of Object.entries(NET_PRESETS[name] || {})) { const el = q(NET_FIELDS[k]); if (el) el.value = v; }
+  if (name === 'direct') { q('#netProxyPass').value = ''; q('#netProxyPassClear').checked = true; }
+}
+
+async function saveNetworkSettings() {
+  const body = {};
+  for (const [k, sel] of Object.entries(NET_FIELDS)) body[k] = q(sel).value.trim();
+  body.region = body.region.toUpperCase();
+  const pass = q('#netProxyPass').value;
+  if (pass) body.proxy_password = pass;
+  else if (q('#netProxyPassClear').checked) body.proxy_password = '';
+  const btn = q('#netSaveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Đang lưu...';
+  try {
+    const s = await api('/api/admin/settings/network', { method: 'PUT', body: JSON.stringify(body) });
+    fillNetworkForm(s);
+    toast('Đã lưu cấu hình proxy & vị trí', 'success');
+    checkAccountWarning();
+  } catch (e) {
+    toast('Lưu thất bại: ' + e.message, 'error');
+  } finally { btn.disabled = false; btn.textContent = '💾 Lưu'; }
+}
+
+async function redetectNetwork() {
+  const btn = q('#netDetectBtn');
+  btn.disabled = true;
+  q('#netDetectStatus').textContent = 'Đang nhận diện vị trí qua proxy đã lưu...';
+  try {
+    const s = await api('/api/admin/settings/network/detect', { method: 'POST' });
+    renderNetworkStatus(s);
+    checkAccountWarning();
+  } catch (e) {
+    q('#netDetectStatus').textContent = '✕ ' + e.message;
+  } finally { btn.disabled = false; }
+}
+
+function setNetResult(kind, html) {
+  const box = q('#netTestResult');
+  const styles = {
+    info: ['var(--color-paper-3)', 'var(--color-rule)', 'var(--color-ink-2)'],
+    ok: ['#f0fdf4', '#bbf7d0', '#166534'],
+    warn: ['#fffbeb', '#fde68a', '#92400e'],
+    err: ['#fef2f2', '#fecaca', '#991b1b'],
+  }[kind];
+  box.style.display = 'block';
+  box.style.background = styles[0]; box.style.border = '1px solid ' + styles[1]; box.style.color = styles[2];
+  box.innerHTML = html;
+}
+
+// Checks the egress IP through the proxy currently typed in the form (nothing is saved).
+async function testNetworkSettings() {
+  const btn = q('#netTestBtn');
+  const body = { proxy: q('#netProxy').value.trim(), proxy_username: q('#netProxyUser').value.trim() };
+  const pass = q('#netProxyPass').value;
+  if (pass) body.proxy_password = pass;
+  else if (q('#netProxyPassClear').checked) body.proxy_password = '';
+  setNetResult('info', esc(`Đang kết nối qua ${body.proxy || 'mạng trực tiếp'}...`));
+  btn.disabled = true;
+  try {
+    const r = await api('/api/admin/settings/network/test', { method: 'POST', body: JSON.stringify(body) });
+    if (!r.ok) { setNetResult('err', '✕ ' + esc(r.error)); return; }
+    const proxyOk = ['JP', 'KR'].includes(r.country);
+    const lines = [
+      `${proxyOk ? '✓' : '⚠️'} IP <b>${esc(r.ip)}</b> · ${esc(r.country)} ${esc(r.city)} · ${esc(r.timezone)} · ${esc(r.loc)}`,
+      `<span style="opacity:.8">qua ${esc(r.via)} · ${esc(r.org)}</span>`,
+    ];
+    if (!proxyOk) lines.push('IP này không thuộc Nhật / Hàn, Dola có thể từ chối.');
+    lines.push('<span style="opacity:.8">Bấm Lưu để dùng proxy này; ô vị trí để trống sẽ tự lấy theo IP trên.</span>');
+    setNetResult(proxyOk ? 'ok' : 'warn', lines.join('<br>'));
+  } catch (e) {
+    setNetResult('err', '✕ ' + esc(e.message));
+  } finally { btn.disabled = false; }
+}
+
+/* ---- Hallmark ⌘K Command Palette Logic ---- */
+function openCommandPalette() {
+  show('cmdPaletteModal');
+  const inp = q('#cmdPaletteInput');
+  if (inp) {
+    inp.value = '';
+    filterCommandPalette();
+    setTimeout(() => inp.focus(), 60);
+  }
+}
+function closeCommandPalette() { hide('cmdPaletteModal'); }
+
+function filterCommandPalette() {
+  const qVal = q('#cmdPaletteInput').value.toLowerCase().trim();
+  const items = document.querySelectorAll('#cmdPaletteList .cmd-item');
+  items.forEach(item => {
+    const text = item.textContent.toLowerCase();
+    item.style.display = text.includes(qVal) ? 'flex' : 'none';
+  });
+}
+
+function handleCmdKey(e) {
+  if (e.key === 'Escape') closeCommandPalette();
+  if (e.key === 'Enter') {
+    const visible = Array.from(document.querySelectorAll('#cmdPaletteList .cmd-item')).filter(i => i.style.display !== 'none');
+    if (visible.length > 0) visible[0].click();
+  }
+}
+
+function execCmd(fn) {
+  closeCommandPalette();
+  if (typeof fn === 'function') fn();
+}
+
+// Global Keyboard Shortcut: Ctrl + K or Cmd + K
+window.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    openCommandPalette();
+  }
+});
+
+/* Refresh Dispatcher */
+function refresh() {
+  checkAccountWarning();
+  if (curTab === 'create') updateApiPayloadPreview();
+  if (curTab === 'dash') loadDash();
+  if (curTab === 'accounts') loadAccounts();
+  if (curTab === 'tasks') loadTasks();
+  if (curTab === 'keys') loadKeys();
+  if (curTab === 'unwatermark') loadDownloads();
+}
+
+// Auto-refresh interval (every 12 seconds)
+setInterval(() => {
+  if (autoRefresh) refresh();
+}, 12000);
+
+// Init on load
+window.addEventListener('DOMContentLoaded', () => {
+  switchTab('create');
+  updatePromptCount();
+  updateApiPayloadPreview();
+  checkBulkStatusOnPageLoad();
+});
+</script>
+</body>
+</html>

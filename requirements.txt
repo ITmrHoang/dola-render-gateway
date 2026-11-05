@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+aiohttp
+pydantic
+patchright
+python-dotenv
+pillow
+opencv-python
+python-multipart
